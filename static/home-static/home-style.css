@@ -1,0 +1,44 @@
+.content{
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align:center ;
+}
+.homepage{
+    width: 100%;
+    height:100vh;
+    background-image: linear-gradient(rgba(0,0,0,0.70),rgba(0,0,0,0.70)),url(home-hospital.jpg);
+    ;
+    background-size: cover;
+    background-position: center;
+}
+h1{
+    font-family: sans-serif;
+    color: white;
+    font-size: 65px;
+    margin-top: 80px;
+}
+button{
+    width:200px;
+    padding: 15px 0;
+    text-align: center;
+    border-radius: 25px;
+    font-weight: bold;
+    border: 2px solid #009688;
+    background: transparent;
+    cursor: pointer;
+    color: white;
+    background: linear-gradient(to right,rgb(51, 51, 253),lightblue);
+    transition: 0.5s;
+}
+p{
+    font-size: 30px;
+    color: white;
+    font-style: sans-serif;
+}
+#lg{
+    margin-top: 30px;
+    margin-left: 50px;
+    width: 150px;
+}

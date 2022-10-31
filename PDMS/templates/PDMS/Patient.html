@@ -1,0 +1,20 @@
+{% extends "PDMS/BaseDashboard.html" %}
+
+{% block title%}
+Patient | {%block sub_title%} {%endblock%}
+{% endblock %}
+
+{% block list_content %}
+	<a href = "/dashboard/" class = {% block link1 %}{%endblock%}>View Profile</a>
+	<a href = "/viewDocuments/" class = {% block link2 %}{%endblock%}>View Documents</a>
+	<a href = "/viewRecieved/" class = {% block link3 %}{%endblock%}>Recieved Documents</a>
+	<a href = "/search/" class = {% block link4 %}{%endblock%}>Search and Share</a>
+	<a href = "/logout/" class = {% block link5 %}{%endblock%}>Logout</a>
+
+{% endblock %}
+
+{% block side_content %}
+	<h1> Patient Dashboard </h1>
+	{%block content%}
+	{%endblock%}
+{% endblock %}

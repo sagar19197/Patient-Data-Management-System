@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>
+		{% block title %}
+		{% endblock %}
+	</title>
+
+	<!-- css -->
+	<style>
+
+		/* Screen resolution */
+		@media screen and (max-width: 400px) {
+		  .side_nav_bar a {
+		    text-align: center;
+		    float: none;
+		 	}
+		}
+
+		@media screen and (max-width: 700px) {
+		  .side_nav_bar {
+		    height: auto;
+		    width: 100%;
+		    position: relative;
+		  }
+		  .side_content {margin-left: 0;}
+		  .side_nav_bar a {float: left;}
+		}
+		/* Else  */
+		.side_content {
+		  height: 100%;
+		  margin-left: 250px;
+		  padding: 1px 16px;
+		}
+		.side_nav_bar a.active {
+		  color: white;
+		  background-color: #04AA6D;
+		}
+
+		.side_nav_bar a:hover:not(.active) {
+		  background-color: #555;
+		}
+
+		.side_nav_bar a {
+		  padding: 16px;
+		  display: block;
+		  color: white;
+		  text-decoration: none;
+		  font-family: sans-serif;
+		}
+
+		.side_nav_bar {
+		  background-color: #152238;
+		  margin: 0;
+		  padding: 0;
+		  width: 250px;
+		  position: fixed;
+		  height: 100%;
+		  overflow: auto;
+		}
+
+}
+	</style>
+</head>
+<body>
+	<div class = "side_nav_bar">
+		{%block list_content%}
+		{%endblock%}
+	</div>
+	<div class ="side_content">
+		{% block side_content %}
+		{% endblock %}
+	</div>
+</body>
+</html>

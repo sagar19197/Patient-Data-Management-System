@@ -2,6 +2,8 @@
 
 <html>
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title> PDMS | Home</title>
         <link rel="stylesheet" href="{% static 'home-static/home-style.css' %}">
     </head>
@@ -15,10 +17,18 @@
                 <p>
                     Nothing is more important than your health.
                 </p>
+                {% if request.user.is_authenticated and door == True%}
+                <div>
+                    <a href = "/logout/"><button type="button">User Logout</button></a>
+                    <a href = "/dashboard/"><button type="button">User Dashboard</button></a>
+                    <p>Welcome, {{request.user.first_name}}</p>
+                </div>
+                {% else %}
                 <div>
                     <a href = "/signup/"><button type="button">User Sign Up</button></a>
                     <a href = "/login/"><button type="button">User Log In</button></a>
                 </div>
+                {% endif %}
             </div>
     
         </div>

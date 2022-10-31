@@ -7,6 +7,14 @@
 </head>
 <body>
 	<h2>Log in </h2>
-
+	<form method = "POST" action = "/login/">
+		{% csrf_token %}
+		<input type="text" name = "username" placeholder="Enter Username">
+		<input type="password" name="password" placeholder="Enter Password">
+		<button type = "submit" value = "submit">Log In</button>				
+	</form>
+	{% for m in messages %}
+		<h4>{{m}}</h4>
+	{% endfor %}
 </body>
 </html>

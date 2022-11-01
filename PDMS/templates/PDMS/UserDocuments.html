@@ -12,6 +12,34 @@ Documents
 
 
 {%block content%}
-<h3>View/Edit Documents</h3>
+<h2>View/Edit Documents</h2>
 
+<h3> Uploaded Documents  </h3>
+<table>
+	<tr>
+		<th>Documents</th>
+		<th>Action</th>
+	</tr>
+	{% for ob in data1 %}
+	<tr>
+		<td><a href={{ob.url}}>Uploaded File {{forloop.counter}}</a></td>
+		<td>
+				<form method = "POST" action = "/deleteUpload/">
+					{%csrf_token%}
+					<input type="hidden" name = "link" value = {{ob.path}}>
+					<button type="submit">Delete</button>
+				</form>
+			</td>
+	</tr>
+	{%endfor%}
+
+</table>
+
+<br><h4> Upload Document</h4>
+<form method = "POST" action = "/viewDocuments/" enctype="multipart/form-data">
+	{%csrf_token %}
+	<input type="file" name="doc" required>
+	<br><br>
+	<button type= "submit">Click here to upload</button>
+</form>
 {%endblock%}

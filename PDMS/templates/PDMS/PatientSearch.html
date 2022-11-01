@@ -12,5 +12,128 @@ Search
 
 
 {%block content%}
-<h3> Search for Services</h3>
+<h2> Search for Services</h2>
+
+<hr>
+<form method="POST" action = "/search/">
+	{%csrf_token%}
+	<select name = "Users">
+		<option value = "all" selected>All</option>
+		<option value = "HealthCareProfessional">Health Care Professional</option>
+		<option value = "Hospital">Hospital</option>
+		<option value = "Pharmacy">Pharmacy</option>
+		<option value = "Insurance">Insurance</option>
+	</select>
+	<input type="text" name="Name" placeholder="Enter Name">
+	<button type="submit">Search</button>
+</form>
+
+{%if data6 == False %}
+<hr>
+{%for i in data3%}
+<h3>Approved {{i}} </h3>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Username</th>
+		<th>Email</th>
+		<th>Share Documents</th>
+	</tr>
+	{%for ob in data1%}
+		{%if ob.sub_category == i and ob.user.status == True%}
+		<tr>
+			<td>{{ob.user.user.first_name}}</td>
+			<td>{{ob.user.user.username}}</td>
+			<td>{{ob.user.user.email}}</td>
+			<td>
+				<form method = "POST" action = "/sendDoc/">
+					{%csrf_token%}
+					<select name = "Documents" required>
+						{%for i in data8%}
+							<option value = {{i}} selected>Uploaded File {{forloop.counter}}</option>
+						{%endfor%}
+					</select>
+					<input type="hidden" name = "username" value = {{ob.user.user.username}}>
+					<button type="submit">Send Documents</button>
+				</form>
+			</td>
+		</tr>
+		{%endif%}
+	{%endfor%}
+</table>
+{%endfor%}
+
+
+<br><hr><h3>Approved Organizations :</h3>
+
+{%for i in data4%}
+<h3>Approved {{i}}</h3>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Username</th>
+		<th>Email</th>
+		<th>Share Documents</th>
+	</tr>
+	{%for ob in data2%}
+		{%if ob.sub_category == i and ob.user.status == True%}
+		<tr>
+			<td>{{ob.user.user.first_name}}</td>
+			<td>{{ob.user.user.username}}</td>
+			<td>{{ob.user.user.email}}</td>
+			<td>
+				<form method = "POST" action = "/sendDoc/">
+					{%csrf_token%}
+					<select name = "Documents" required>
+						{%for i in data8%}
+							<option value = {{i}} selected>Uploaded File {{forloop.counter}}</option>
+						{%endfor%}
+					</select>
+					<input type="hidden" name = "username" value = {{ob.user.user.username}}>
+					<button type="submit">Send Documents</button>
+				</form>
+			</td>
+		</tr>
+		{%endif%}
+	{%endfor%}
+</table>
+{%endfor%}
+
+{% else %}
+
+{% if not data5 %}
+	<h3>No Searches found</h3>
+{% else%}
+<h3>{{data7}}</h3>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Username</th>
+		<th>Email</th>
+		<th>Type of User</th>
+		<th>Share Documents</th>
+	</tr>
+	{%for ob in data5%}
+		<tr>
+			<td>{{ob.user.user.first_name}}</td>
+			<td>{{ob.user.user.username}}</td>
+			<td>{{ob.user.user.email}}</td>
+			<td>{{ob.sub_category}}</td>
+			<td>
+				<form method = "POST" action = "/sendDoc/">
+					{%csrf_token%}
+					<select name = "Documents" required>
+						{%for i in data8%}
+							<option value = {{i}} selected>Uploaded File {{forloop.counter}}</option>
+						{%endfor%}
+					</select>
+					<input type="hidden" name = "username" value = {{ob.user.user.username}}>
+					<button type="submit">Send Documents</button>
+				</form>
+			</td>
+		</tr>
+	{%endfor%}
+</table>
+{%endif%}
+{%endif%}
 {%endblock%}

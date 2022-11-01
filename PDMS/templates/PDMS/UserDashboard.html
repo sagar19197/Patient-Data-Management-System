@@ -11,6 +11,27 @@ Profile
 {% block link5 %}inactive{%endblock%}
 
 {%block content%}
-<h3>View/Edit Profile</h3>
-
+<h2>View/Edit Profile</h2>
+<form method = "POST" action = "/dashboard/">
+	{%csrf_token%}
+	Name:
+	<input type="text" name="name" value = {{data.first_name}}>
+	<br><br>
+	Email:
+	<input type = "Email" name = "email" value = {{data.email}}>
+	<br><br>
+	Username:
+	{{request.user.username}}
+	<br><br>
+	Current password : <input type="password" name = "current_pass" required><br><br>
+	<h4>Change Password:</h4>
+	New password : <input type="password" name="new_pass"><br><br>
+	Confirm New password : <input type="password" name="new_pass_confirm">
+	<br><br>
+	<button type="Submit"> Change</button>
+	<br><br>
+</form>
+{% for m in messages %}
+	<h4>{{m}}</h4>
+{% endfor %}
 {%endblock%}

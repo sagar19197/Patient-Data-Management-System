@@ -12,5 +12,20 @@ Recieved
 
 
 {%block content%}
-<h3>View Received Documents</h3>
+<h2>View Received Documents</h2>
+
+<table>
+	<tr>
+		<th>Sender</th>
+		<th>Action</th>
+	</tr>
+	{% for ob in data1 %}
+	<tr>
+		<td>{{ob.recieved_from_user}}</td>
+		<td><a href = {{ob.documents.url}}><button>View PDF</button></a></td>
+	</tr>
+	{%endfor%}
+
+</table>
+
 {%endblock%}

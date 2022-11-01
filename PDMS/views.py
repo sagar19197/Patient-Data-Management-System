@@ -42,16 +42,42 @@ def loginUser(response):
 
 
 
+def registerOrg(response):
+	if response.user.is_authenticated:
+		user = get_object_or_404(allUsers, user = response.user);
+		if user.top_category == "admin" or user.status == True:
+			return redirect("dashboard");
+	elif response.method == "POST":
+		resp = response.POST;
+	return redirect(response, "PDMS/SignUpPage.html")
+
 # View for sign up
 def registerUser(response):
 	if response.user.is_authenticated:
 		user = get_object_or_404(allUsers, user = response.user);
 		if user.top_category == "admin" or user.status == True:
 			return redirect("dashboard");
-		else:
-			return redirect("home");
+	elif response.method == "POST":
+		resp = response.POST;
 	return render(response, "PDMS/SignUpPage.html");
 
+
+def editProfile(response,data):
+	resp = response.POST;
+	user_post = allUsers.objects.get(user = response.user).user;
+	user_post.first_name = resp.get('name');
+	user_post.email = resp.get('email');
+	if response.user.check_password(resp.get('current_pass')):
+		if resp.get('new_pass') == resp.get('new_pass_confirm'):
+			if len(resp.get('new_pass')) != 0:
+				user_post.set_password(resp.get("new_pass"));
+			user_post.save();
+			data["data"] = user_post
+			messages.success(response, "Profile Updated successfully !!");
+		else:
+			messages.error(response, "Invalid credendtials !!");
+	else:
+		messages.error(response,"Invalid credendtials !!");
 
 
 #View for dashboad -
@@ -61,26 +87,15 @@ def dashboard(response):
 		data = {"data" : allUsers.objects.get(user = response.user).user}
 		if user.top_category == "admin":
 			if response.method == "POST":
-				resp = response.POST;
-				user_post = allUsers.objects.get(user = response.user).user;
-				user_post.first_name = resp.get('name');
-				user_post.email = resp.get('email');
-				if response.user.check_password(resp.get('current_pass')):
-					if resp.get('new_pass') == resp.get('new_pass_confirm'):
-						if len(resp.get('new_pass')) != 0:
-							user_post.set_password(resp.get("new_pass"));
-						user_post.save();
-						data["data"] = user_post
-						messages.success(response, "Profile Updated successfully !!");
-					else:
-						messages.error(response, "Invalid credendtials !!");
-				else:
-					messages.error(response,"Invalid credendtials !!");
-				
+				editProfile(response,data);
 			return render(response,"PDMS/AdminDashboard.html",data);
+
 		elif user.status == True:
 			if user.top_category == "Users":
-				return render(response,"PDMS/UserDashboard.html");
+				if response.method == "POST":
+					editProfile(response,data);
+				return render(response,"PDMS/UserDashboard.html",data);
+
 			elif user.top_category == "Organizations":
 				sub_user = get_object_or_404(Organizations, user = user);
 				if sub_user.sub_category == "Hospital":
@@ -120,6 +135,52 @@ def deleteUser(user):
 	user.delete();
 
 
+# For showing upload files - 
+def ShowUploads(user):
+	l = [];
+	if user.top_category == "Users":
+		user2 = Users.objects.get(user = user);
+		if(os.path.exists(user2.poi.path)):
+			l.append(user2.poi);
+		docs = UploadDocuments.objects.filter(user = user);
+		for doc in docs:
+			if os.path.exists(doc.documents.path):
+				l.append(doc.documents);
+			else:
+				doc.delete();
+	elif user.top_category =="Organizations":
+		user2 = Organizations.objects.get(user = user);
+		if(os.path.exists(user2.poi.path)):
+			l.append(user2.poi);
+		if(os.path.exists(user2.poi.path)):
+			l.append(user2.pic1);
+		if(os.path.exists(user2.poi.path)):
+			l.append(user2.pic2);
+
+		docs = UploadDocuments.objects.filter(user = user);
+		for doc in docs:
+			if os.path.exists(doc.documents.path):
+				l.append(doc.documents);
+			else:
+				doc.delete();
+
+	return l;
+
+
+
+def userDeleteUpload(response):
+	if response.user.is_authenticated:
+		user = get_object_or_404(allUsers, user = response.user);
+		if user.top_category == "Users":
+			if response.method == "POST":
+				resp = response.POST;
+				path = resp.get('link')
+
+				if(os.path.exists(path)):
+					os.remove(path);
+				return redirect("viewDocuments");
+
+	return redirect("home");
 
 #View for documents 
 def viewDocuments(response):
@@ -141,9 +202,15 @@ def viewDocuments(response):
 				else:
 					deleteUser(user_action);
 			return render(response,"PDMS/AdminApprove.html",data);
+
 		elif user.status == True:
 			if user.top_category == "Users":
-				return render(response,"PDMS/UserDocuments.html");
+				if response.method == "POST":
+					doc = UploadDocuments(user = user, documents = response.FILES["doc"]); 
+					doc.save();
+				data = { "data1" : ShowUploads(user)};
+				return render(response,"PDMS/UserDocuments.html", data);
+
 			elif user.top_category == "Organizations":
 				sub_user = get_object_or_404(Organizations, user = user);
 				if sub_user.sub_category == "Hospital":
@@ -154,6 +221,27 @@ def viewDocuments(response):
 					return render(response,"PDMS/AdminDashboard.html");
 	return redirect("home");
 
+
+# For showing receivied files - 
+def ShowReceived(user):
+	l = [];
+	if user.top_category == "Users":
+		user2 = Users.objects.get(user = user);
+		docs = ReceivedDocuments.objects.filter(user = user);
+		for doc in docs:
+			if os.path.exists(doc.documents.path):
+				l.append(doc);
+			else:
+				doc.delete();
+	elif user.top_category =="Organizations":
+		docs = ReceivedDocuments.objects.filter(user = user);
+		for doc in docs:
+			if os.path.exists(doc.documents.path):
+				l.append(doc);
+			else:
+				doc.delete();
+
+	return l;
 
 
 # View for recieved documents - 
@@ -169,7 +257,8 @@ def viewRecieved(response):
 			return render(response,"PDMS/AdminAllUsers.html",data);
 		elif user.status == True:
 			if user.top_category == "Users":
-				return render(response,"PDMS/UserRecievedDocuments.html");
+				data = { "data1" : ShowReceived(user)};
+				return render(response,"PDMS/UserRecievedDocuments.html", data);
 			elif user.top_category == "Organizations":
 				sub_user = get_object_or_404(Organizations, user = user);
 				if sub_user.sub_category == "Hospital":
@@ -196,6 +285,17 @@ def adminDeleteUser(response):
 
 	return redirect("home");
 
+
+def userSendDoc(response):
+	if response.user.is_authenticated:
+		user = get_object_or_404(allUsers, user = response.user);
+		if response.method == "POST":
+			resp = response.POST;
+			user_action = get_object_or_404(User,username = resp.get("username"));
+			user_action = get_object_or_404(allUsers, user = user_action);
+			r = ReceivedDocuments(user = user_action, recieved_from_user = resp.get("username"), documents = resp.get("Documents"));
+			r.save();
+	return redirect('search');
 
 # View for search documents - 
 def search(response):
@@ -236,11 +336,41 @@ def search(response):
 					s+=" with name "+ r2;
 				data["data7"] = s;
 			return render(response,"PDMS/AdminSearch.html",data);
+
 		elif user.status == True:
 			if user.top_category == "Users":
 				sub_user = get_object_or_404(Users, user = user);
 				if sub_user.sub_category == "Patient":
-					return render(response,"PDMS/PatientSearch.html");
+					data["data3"] = ["HealthCareProfessional"]
+					if response.method == "POST":
+						resp = response.POST;
+						r1 = resp.get('Users');
+						r2 = resp.get('Name');
+						data3 = User.objects.filter(first_name__startswith  = r2);
+						data5 = [];
+						for ob in data3:
+							temp = allUsers.objects.filter(user = ob).first();
+							if temp != None:
+								if(temp.status == True):
+									temp2 = "xxx";
+									if temp.top_category == "Users":
+										temp2 = Users.objects.get(user = temp);
+									elif temp.top_category == "Organizations":
+										temp2 = Organizations.objects.get(user = temp);
+
+									if temp2!="xxx" and (temp2.sub_category == r1 or r1 =="all"):
+										data5.append(temp2);
+
+						data["data5"] = data5;
+						data['data6'] = True;
+						s = "Showing result for " + r1 +" category";
+						if(r2 != ""):
+							s+=" with name "+ r2;
+						data["data7"] = s;
+					data["data8"] = ShowUploads(user);
+					
+					return render(response,"PDMS/PatientSearch.html",data);
+
 				elif sub_category == "HealthCareProfessional":
 					return render(response,"PDMS/AdminDashboard.html");
 			elif user.top_category == "Organizations":

@@ -11,13 +11,15 @@ def getDirectory(instance, filename):
 
 
 def getDirectoryUpload(instance, filename):
-	file = "doc" + str(instance.user.doc_counter) +".pdf";
-	instance.doc_counter+=1;
+	split = os.path.splitext(filename);
+	file = "doc" + str(instance.user.doc_counter) +split[1];
+	instance.user.doc_counter+=1;
 	return f'{instance.user.top_category}/{instance.user.user.username}/uploads/{file}';
 
 
 def getDirectoryReceived(instance, filename):
-	file = "doc" + instance.user.doc_counter+ ".pdf";
+	split = os.path.splitext(filename);
+	file = "doc" + str(instance.user.doc_counter) +split[1];
 	instance.user.doc_counter+=1;
 	return f'{instance.user.top_category}/{instance.user.user.username}/received/{file}';
 

@@ -1,11 +1,147 @@
+{% load static %}
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>PDMS | Sign Up</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'home-static/cssfile.css' %}">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <title>Document</title>
 </head>
 <body>
-	<h2> Sign Up </h2>
+    <div class="outer">
+        <div class="form-container">
+            <div class="button-container">
+                <div id="btn"></div>
+                <button type="button" id="login-btn" class="toggle-btn" onclick="login()">User</button>
+                <button type="button" id = "register-btn" class="toggle-btn" onclick="register()">Organization</button>
+            </div>
+            <form id="login" method = "POST" action="/signup/" class="input">
+                <input type="text" class="input-field" placeholder="Name" pattern="(?=.*[a-z])" title="Must contain only lowercase"  name = "name" required>
+                
+                <input type="text" class="input-field" placeholder="User Name" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one uppercase and lowercase letter, and between 8 and 15 characters"  name = "username" required>
+                <input type="email" class="input-field" placeholder="Email Address" name ="email" required>
+                <input type="password" id = pass1 class="input-field" placeholder="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 15 characters" name ="password" required>
+                <input type="password" id = pass2 class="input-field" placeholder="Confirm Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 15 characters" required>
+            	<br><br>
+            	Type of User:
+            	<select name = "type" required>
+            		<option value = "Patient">Patient</option>
+            		<option value = "HealthCareProfessional">Health Care Professional</option>
+            	</select>
+            	<br><br>
+                <label for="Aadhar" >Upload Proof of Identity:</label>
+                <input type="file"  onchange="filevalidation()" placeholder="Upload Aadhar" name="filename" id="Aadhar" accept="application/pdf" name ="doc">
+                <br><br>
+                <div class="g-recaptcha" data-sitekey="6LfEdMoiAAAAAI2VVn72munk8NCQ9bWET5JxepmR"></div>
+
+                <button type="submit" class="submit-btn">Register</button>
+            </form>
+
+            <form id = "register" method = "POST" action="/signupOrg/" class="input">
+                <input type="text" class="input-field" placeholder="Organisation Name" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one uppercase and lowercase letter, and between 8 and 15 characters" required >
+                <input type="email" class="input-field" placeholder="Email Address" required>
+                <input type="password" id = "passregister1" class="input-field" placeholder="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 15 characters" required>
+                
+                <input type="password" id = "passregister2" class="input-field" placeholder="Confirm Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 15 characters" required>
+                <input type="text" class="input-field" placeholder="Description" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}" title="Must be greater than 8 characters and less than 100 characters" required>
+                <input type="text" class="input-field" placeholder="Location" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one uppercase and lowercase letter, and between 8 and 15 characters" required >
+                <input type = "number" id = "phone-number" class = input-field placeholder="Phone number" min = "1000000000" max = "9999999999" title = "must be a 12 digit number" required>
+                <br><br>
+                <select name = "type" required>
+            		<option value = "Hospital">Hospital</option>
+            		<option value = "Pharmacy">Pharmacy</option>
+            		<option value = "Insurance Company">Insurance Company</option>
+            	</select>
+            	<br>
+                <label for="img">Org picture</label>
+                <input type="file" id="img" name="img" accept="image/*">
+
+                <br>
+                
+                <label for="Aadhar2" >Upload your aadhar:</label>
+                <input type="file"  onchange="filevalidation()" placeholder="Upload Aadhar" name="filename" id="Aadhar2" accept="application/pdf">
+                <div class="g-recaptcha" data-sitekey="6LfEdMoiAAAAAI2VVn72munk8NCQ9bWET5JxepmR"></div>
+                <button type="submit" class="submit-btn">Register</button>
+                
+            </form>
+
+        </div>
+    </div>
+    <script>
+        var x = document.getElementById("login");
+        var y = document.getElementById("register");
+        var z = document.getElementById("btn");
+        var registerpass1 = document.getElementById("passregister1");
+        var registerpass2 = document.getElementById("passregister2");
+        var loginpass1 = document.getElementById("pass1");
+        var loginpass2 = document.getElementById("pass2");
+
+        function validatePassword_login(){
+            if(loginpass1.value != loginpass2.value) {
+                loginpass2.setCustomValidity("Passwords Don't Match");
+            }
+            else{
+                loginpass2.setCustomValidity("");
+            }
+        };
+
+        loginpass1.onchange = validatePassword_login;
+        loginpass2.onkeyup = validatePassword_login;
+
+        function validatePassword_register(){
+            if(registerpass1.value != registerpass2.value) {
+                registerpass2.setCustomValidity("Passwords Don't Match");
+            }
+            else{
+                registerpass2.setCustomValidity("");
+            }
+        };
+
+        registerpass1.onchange = validatePassword_register;
+        registerpass2.onkeyup = validatePassword_register;
+
+        function register(){
+            x.style.left = "-400px";
+            y.style.left = "50px";
+            z.style.left = "110px"
+        };
+
+        function login(){
+            x.style.left = "50px"
+            y.style.left = "450px"
+            z.style.left = "0px"
+        };
+
+        function filevalidation(){
+            const file = document.getElementById("Aadhar");
+            if(file.files.length>0){
+                const filesize = Math.round(file.files.item(0).size/1024);
+                if(filesize>1024){
+                    alert("File size is too big, please select a file less than 2MB");
+                }
+                if(filesize==0){
+                    alert("File size is too small")
+                }
+            }
+        };
+        function filevalidation(){
+            const file = document.getElementById("Aadhar2");
+            if(file.files.length>0){
+                const filesize = Math.round(file.files.item(0).size/1024);
+                if(filesize>1024){
+                    alert("File size is too big, please select a file less than 2MB");
+                }
+                if(filesize==0){
+                    alert("File size is too small")
+                }
+            }
+        };
+
+
+
+    </script>
 </body>
 </html>

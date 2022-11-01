@@ -1,20 +1,55 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>PDMS | LOG IN</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'home-static/logincss.css' %}">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <title>PDMS | LOG IN</title>
 </head>
 <body>
-	<h2>Log in </h2>
-	<form method = "POST" action = "/login/">
-		{% csrf_token %}
-		<input type="text" name = "username" placeholder="Enter Username">
-		<input type="password" name="password" placeholder="Enter Password">
-		<button type = "submit" value = "submit">Log In</button>				
-	</form>
-	{% for m in messages %}
-		<h4>{{m}}</h4>
-	{% endfor %}
+    <div class="outer">
+        <div class="form-container">
+            <div class="button-container">
+                <h2>Sign in to PDSM</h2>
+            </div>
+            <form id="login" method = "POST" action="/login/" class="input">
+            	{% csrf_token %}
+                <input type="text" class="input-field" name = "username" placeholder="Enter Username" required>
+                <input type="password" id = pass1 class="input-field" placeholder="Password"  name = "password" required>
+                
+                <div class="g-recaptcha" data-sitekey="6LfEdMoiAAAAAI2VVn72munk8NCQ9bWET5JxepmR"></div>
+
+                <button type="submit" class="submit-btn" value="submit">Login</button>
+            </form>
+            {% for m in messages %}
+			<h4>{{m}}</h4>
+			{% endfor %}
+        </div>
+    </div>
+    <script>
+        var x = document.getElementById("login");
+        var y = document.getElementById("register");
+        var z = document.getElementById("btn");
+        var registerpass1 = document.getElementById("passregister1");
+        var registerpass2 = document.getElementById("passregister2");
+
+
+        function validatePassword_login(){
+            if(loginpass1.value != loginpass2.value) {
+                loginpass2.setCustomValidity("Passwords Don't Match");
+            }
+            else{
+                loginpass2.setCustomValidity("");
+            }
+        };
+
+        loginpass1.onchange = validatePassword_login;
+        loginpass2.onkeyup = validatePassword_login;
+
+
+    </script>
 </body>
 </html>

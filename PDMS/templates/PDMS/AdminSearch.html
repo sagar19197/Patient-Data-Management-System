@@ -11,6 +11,119 @@ Search
 {% block link5 %}inactive{%endblock%}
 
 {%block content%}
-<h3>Search and Delete Users</h3>
+<h2>Search and Delete Approved Users</h2>
+<hr>
+<form method="POST" action = "/search/">
+	{%csrf_token%}
+	<select name = "Users">
+		<option value = "all" selected>All</option>
+		<option value = "Patient">Patients</option>
+		<option value = "HealthCareProfessional">Health Care Professional</option>
+		<option value = "Hospital">Hospital</option>
+		<option value = "Pharmacy">Pharmacy</option>
+		<option value = "Insurance">Insurance</option>
+	</select>
+	<input type="text" name="Name" placeholder="Enter Name">
+	<button type="submit">Search</button>
+</form>
 
+{%if data6 == False %}
+<hr>
+{%for i in data3%}
+<h3>Approved {{i}} </h3>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Username</th>
+		<th>Email</th>
+		<th>Proof of Identity</th>
+		<th>Delete User</th>
+	</tr>
+	{%for ob in data1%}
+		{%if ob.sub_category == i and ob.user.status == True%}
+		<tr>
+			<td>{{ob.user.user.first_name}}</td>
+			<td>{{ob.user.user.username}}</td>
+			<td>{{ob.user.user.email}}</td>
+			<td><a href={{ob.poi.url}}>PDF</a></td>
+			<td>
+				<form method = "POST" action = "/deleteUser/">
+					{%csrf_token%}
+					<input type="hidden" name = "username" value = {{ob.user.user.username}}>
+					<button type="submit">Delete</button>
+				</form>
+			</td>
+		</tr>
+		{%endif%}
+	{%endfor%}
+</table>
+{%endfor%}
+
+
+<br><hr><h3>Approved Organizations :</h3>
+
+{%for i in data4%}
+<h3>Approved {{i}}</h3>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Username</th>
+		<th>Email</th>
+		<th>Proof of Identity</th>
+		<th>Delete User</th>
+	</tr>
+	{%for ob in data2%}
+		{%if ob.sub_category == i and ob.user.status == True%}
+		<tr>
+			<td>{{ob.user.user.first_name}}</td>
+			<td>{{ob.user.user.username}}</td>
+			<td>{{ob.user.user.email}}</td>
+			<td><a href={{ob.poi.url}}>PDF</a></td>
+			<td>
+				<form method = "POST" action = "/deleteUser/">
+					{%csrf_token%}
+					<input type="hidden" name = "username" value = {{ob.user.user.username}}>
+					<button type="submit">Delete</button>
+				</form>
+			</td>
+		</tr>
+		{%endif%}
+	{%endfor%}
+</table>
+{%endfor%}
+
+{% else %}
+
+{% if not data5 %}
+	<h3>No Searches found</h3>
+{% else%}
+<h3>{{data7}}</h3>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Username</th>
+		<th>Email</th>
+		<th>Proof of Identity</th>
+		<th>Type of User</th>
+		<th>Delete User</th>
+	</tr>
+	{%for ob in data5%}
+		<tr>
+			<td>{{ob.user.user.first_name}}</td>
+			<td>{{ob.user.user.username}}</td>
+			<td>{{ob.user.user.email}}</td>
+			<td><a href={{ob.poi.url}}>PDF</a></td>
+			<td>{{ob.sub_category}}</td>
+			<td>
+				<form method = "POST" action = "/deleteUser/">
+					{%csrf_token%}
+					<input type="hidden" name = "username" value = {{ob.user.user.username}}>
+					<button type="submit">Delete</button>
+				</form>
+			</td>
+		</tr>
+	{%endfor%}
+</table>
+{%endif%}
+{%endif%}
 {%endblock%}

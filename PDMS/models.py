@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
 import os
 
-
 def getDirectory(instance, filename):
 	split = os.path.splitext(filename);
 	file = "proof" + str(instance.user.doc_counter) +split[1];
@@ -31,7 +30,7 @@ class allUsers(models.Model):
 	doc_counter = 1;
 
 	def __str__(self):
-		return self.top_category +"-"+ self.user.username;
+		return self.top_category +"-"+ self.user.username;		
 
 
 class Users(models.Model):
@@ -41,8 +40,6 @@ class Users(models.Model):
 
 	def __str__(self):
 		return self.sub_category+"-"+ self.user.user.username;
-
-
 
 
 class Organizations(models.Model):

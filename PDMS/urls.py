@@ -13,6 +13,7 @@ urlpatterns = [
     path('viewRecieved/',views.viewRecieved, name = "viewRecieved"),
     path('search/', views.search, name = "search"),
     path('logout/', views.logoutUser, name = "logoutUser"),
+    path('deleteUser/', views.adminDeleteUser, name = "adminDeleteUser"),
 ]
 
 if settings.DEBUG:

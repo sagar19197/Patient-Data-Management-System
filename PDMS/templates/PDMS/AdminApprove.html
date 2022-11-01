@@ -11,6 +11,71 @@ Approve Registration
 {% block link5 %}inactive{%endblock%}
 
 {%block content%}
-<h3>Approve Registration</h3>
+<h2>Approve Registration</h2><hr>
 
+<h3>User Registrations :</h3>
+{%for i in data3%}
+<h3>{{i}} Registrations</h3>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Username</th>
+		<th>Email</th>
+		<th>Proof of Identity</th>
+		<th>Approve/Reject</th>
+	</tr>
+	{%for ob in data1%}
+		{%if ob.sub_category == i and ob.user.status == False%}
+		<tr>
+			<td>{{ob.user.user.first_name}}</td>
+			<td>{{ob.user.user.username}}</td>
+			<td>{{ob.user.user.email}}</td>
+			<td><a href={{ob.poi.url}}>PDF</a></td>
+			<td>
+				<form method = "POST" action = "/viewDocuments/">
+					{%csrf_token%}
+					<input type="hidden" name = "username" value = {{ob.user.user.username}}>
+					<button type="submit" name = "action" value = "Approve">Approve</button>
+					<button type ="submit" name = "action" value = "Reject">Reject</button>
+				</form>
+			</td>
+		</tr>
+		{%endif%}
+	{%endfor%}
+</table>
+{%endfor%}
+
+
+<br><hr><h3>Organization Registrations :</h3>
+
+{%for i in data4%}
+<h3>{{i}} Registrations</h3>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Username</th>
+		<th>Email</th>
+		<th>Proof of Identity</th>
+		<th>Approve/Reject</th>
+	</tr>
+	{%for ob in data2%}
+		{%if ob.sub_category == i and ob.user.status == False%}
+		<tr>
+			<td>{{ob.user.user.first_name}}</td>
+			<td>{{ob.user.user.username}}</td>
+			<td>{{ob.user.user.email}}</td>
+			<td><a href={{ob.poi.url}}>PDF</a></td>
+			<td>
+				<form method = "POST" action = "/viewDocuments/">
+					{%csrf_token%}
+					<input type="hidden" name = "username" value = {{ob.user.user.username}}>
+					<button type="submit" name = "action" value = "Approve">Approve</button>
+					<button type ="submit" name = "action" value = "Reject">Reject</button>
+				</form>
+			</td>
+		</tr>
+		{%endif%}
+	{%endfor%}
+</table>
+{%endfor%}
 {%endblock%}

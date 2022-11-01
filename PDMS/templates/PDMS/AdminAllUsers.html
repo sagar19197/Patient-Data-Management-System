@@ -11,6 +11,52 @@ All Users
 {% block link5 %}inactive{%endblock%}
 
 {%block content%}
-<h3>All Approved Users</h3>
+<h2>Approved Users :</h2><hr>
 
+{%for i in data3%}
+<h3>Approved {{i}} </h3>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Username</th>
+		<th>Email</th>
+		<th>Proof of Identity</th>
+	</tr>
+	{%for ob in data1%}
+		{%if ob.sub_category == i and ob.user.status == True%}
+		<tr>
+			<td>{{ob.user.user.first_name}}</td>
+			<td>{{ob.user.user.username}}</td>
+			<td>{{ob.user.user.email}}</td>
+			<td><a href={{ob.poi.url}}>PDF</a></td>
+		</tr>
+		{%endif%}
+	{%endfor%}
+</table>
+{%endfor%}
+
+
+<br><hr><h3>Approved Organizations :</h3>
+
+{%for i in data4%}
+<h3>Approved {{i}}</h3>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Username</th>
+		<th>Email</th>
+		<th>Proof of Identity</th>
+	</tr>
+	{%for ob in data2%}
+		{%if ob.sub_category == i and ob.user.status == True%}
+		<tr>
+			<td>{{ob.user.user.first_name}}</td>
+			<td>{{ob.user.user.username}}</td>
+			<td>{{ob.user.user.email}}</td>
+			<td><a href={{ob.poi.url}}>PDF</a></td>
+		</tr>
+		{%endif%}
+	{%endfor%}
+</table>
+{%endfor%}
 {%endblock%}

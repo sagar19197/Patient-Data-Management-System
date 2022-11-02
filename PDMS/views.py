@@ -108,11 +108,22 @@ def editProfile(response,data):
 	user_post = allUsers.objects.get(user = response.user).user;
 	user_post.first_name = resp.get('name');
 	user_post.email = resp.get('email');
+
+	u11 = allUsers.objects.get(user = response.user);
+	if u11.top_category == "Organizations":
+		u1 = Organizations.objects.get(user = u11);
+		u1.desc = resp.get("desc");
+		u1.location = resp.get("location");
+		u1.contact = resp.get("contact");
+
 	if response.user.check_password(resp.get('current_pass')):
 		if resp.get('new_pass') == resp.get('new_pass_confirm'):
 			if len(resp.get('new_pass')) != 0:
 				user_post.set_password(resp.get("new_pass"));
 			user_post.save();
+			if u11.top_category == "Organizations":
+				u1.save();
+				data["data2"] = u1;
 			data["data"] = user_post
 			messages.success(response, "Profile Updated successfully !!");
 		else:
@@ -139,13 +150,14 @@ def dashboard(response):
 				return render(response,"PDMS/UserDashboard.html",data);
 
 			elif user.top_category == "Organizations":
-				sub_user = get_object_or_404(Organizations, user = user);
-				if sub_user.sub_category == "Hospital":
-					return render(response,"PDMS/AdminDashboard.html");
-				elif sub_user.sub_category == "Pharmacy":
-					return render(response,"PDMS/AdminDashboard.html");
-				elif sub_user.sub_category == "Insurance":
-					return render(response,"PDMS/AdminDashboard.html");
+				s = allUsers.objects.get(user = response.user);
+				s = Organizations.objects.get(user = s);
+				data["data2"] = s;
+				if response.method == "POST":
+					editProfile(response,data);
+				
+				return render(response,"PDMS/OrganizationDashboard.html",data);
+				
 	return redirect("home");
 
 
@@ -254,13 +266,12 @@ def viewDocuments(response):
 				return render(response,"PDMS/UserDocuments.html", data);
 
 			elif user.top_category == "Organizations":
-				sub_user = get_object_or_404(Organizations, user = user);
-				if sub_user.sub_category == "Hospital":
-					return render(response,"PDMS/AdminDashboard.html");
-				elif sub_user.sub_category == "Pharmacy":
-					return render(response,"PDMS/AdminDashboard.html");
-				elif sub_user.sub_category == "Insurance":
-					return render(response,"PDMS/AdminDashboard.html");
+				if response.method == "POST":
+					doc = UploadDocuments(user = user, documents = response.FILES["doc"]); 
+					doc.save();
+				data = { "data1" : ShowUploads(user)};
+				return render(response,"PDMS/UserDocuments.html", data);
+				
 	return redirect("home");
 
 
@@ -302,13 +313,8 @@ def viewRecieved(response):
 				data = { "data1" : ShowReceived(user)};
 				return render(response,"PDMS/UserRecievedDocuments.html", data);
 			elif user.top_category == "Organizations":
-				sub_user = get_object_or_404(Organizations, user = user);
-				if sub_user.sub_category == "Hospital":
-					return render(response,"PDMS/AdminDashboard.html");
-				elif sub_user.sub_category == "Pharmacy":
-					return render(response,"PDMS/AdminDashboard.html");
-				elif sub_user.sub_category == "Insurance":
-					return render(response,"PDMS/AdminDashboard.html");
+				data = { "data1" : ShowReceived(user)};
+				return render(response,"PDMS/UserRecievedDocuments.html", data);
 	return redirect("home");
 
 
@@ -335,7 +341,7 @@ def userSendDoc(response):
 			resp = response.POST;
 			user_action = get_object_or_404(User,username = resp.get("username"));
 			user_action = get_object_or_404(allUsers, user = user_action);
-			r = ReceivedDocuments(user = user_action, recieved_from_user = resp.get("username"), documents = resp.get("Documents"));
+			r = ReceivedDocuments(user = user_action, recieved_from_user = user.user.username, documents = resp.get("Documents"));
 			r.save();
 	return redirect('search');
 
@@ -413,16 +419,128 @@ def search(response):
 					
 					return render(response,"PDMS/PatientSearch.html",data);
 
-				elif sub_category == "HealthCareProfessional":
-					return render(response,"PDMS/AdminDashboard.html");
+				elif sub_user.sub_category == "HealthCareProfessional":
+					data["data3"] = ["Patient"]
+					if response.method == "POST":
+						resp = response.POST;
+						r1 = resp.get('Users');
+						r2 = resp.get('Name');
+						data3 = User.objects.filter(first_name__startswith  = r2);
+						data5 = [];
+						for ob in data3:
+							temp = allUsers.objects.filter(user = ob).first();
+							if temp != None:
+								if(temp.status == True):
+									temp2 = "xxx";
+									if temp.top_category == "Users":
+										temp2 = Users.objects.get(user = temp);
+									elif temp.top_category == "Organizations":
+										temp2 = Organizations.objects.get(user = temp);
+
+									if temp2!="xxx" and (temp2.sub_category == r1 or r1 =="all"):
+										data5.append(temp2);
+
+						data["data5"] = data5;
+						data['data6'] = True;
+						s = "Showing result for " + r1 +" category";
+						if(r2 != ""):
+							s+=" with name "+ r2;
+						data["data7"] = s;
+					data["data8"] = ShowUploads(user);
+					
+					return render(response,"PDMS/PatientSearch.html",data);
 			elif user.top_category == "Organizations":
 				sub_user = get_object_or_404(Organizations, user = user);
 				if sub_user.sub_category == "Hospital":
-					return render(response,"PDMS/AdminDashboard.html");
+					data["data3"] = ["Patient"]
+					if response.method == "POST":
+						resp = response.POST;
+						r1 = resp.get('Users');
+						r2 = resp.get('Name');
+						data3 = User.objects.filter(first_name__startswith  = r2);
+						data5 = [];
+						for ob in data3:
+							temp = allUsers.objects.filter(user = ob).first();
+							if temp != None:
+								if(temp.status == True):
+									temp2 = "xxx";
+									if temp.top_category == "Users":
+										temp2 = Users.objects.get(user = temp);
+									elif temp.top_category == "Organizations":
+										temp2 = Organizations.objects.get(user = temp);
+
+									if temp2!="xxx" and (temp2.sub_category == r1 or r1 =="all"):
+										data5.append(temp2);
+
+						data["data5"] = data5;
+						data['data6'] = True;
+						s = "Showing result for " + r1 +" category";
+						if(r2 != ""):
+							s+=" with name "+ r2;
+						data["data7"] = s;
+					data["data8"] = ShowUploads(user);
+					
+					return render(response,"PDMS/PatientSearch.html",data);
 				elif sub_user.sub_category == "Pharmacy":
-					return render(response,"PDMS/AdminDashboard.html");
+					data["data3"] = ["Patient"]
+					if response.method == "POST":
+						resp = response.POST;
+						r1 = resp.get('Users');
+						r2 = resp.get('Name');
+						data3 = User.objects.filter(first_name__startswith  = r2);
+						data5 = [];
+						for ob in data3:
+							temp = allUsers.objects.filter(user = ob).first();
+							if temp != None:
+								if(temp.status == True):
+									temp2 = "xxx";
+									if temp.top_category == "Users":
+										temp2 = Users.objects.get(user = temp);
+									elif temp.top_category == "Organizations":
+										temp2 = Organizations.objects.get(user = temp);
+
+									if temp2!="xxx" and (temp2.sub_category == r1 or r1 =="all"):
+										data5.append(temp2);
+
+						data["data5"] = data5;
+						data['data6'] = True;
+						s = "Showing result for " + r1 +" category";
+						if(r2 != ""):
+							s+=" with name "+ r2;
+						data["data7"] = s;
+					data["data8"] = ShowUploads(user);
+					
+					return render(response,"PDMS/PatientSearch.html",data);
 				elif sub_user.sub_category == "Insurance":
-					return render(response,"PDMS/AdminDashboard.html");
+					data["data3"] = ["Patient"]
+					if response.method == "POST":
+						resp = response.POST;
+						r1 = resp.get('Users');
+						r2 = resp.get('Name');
+						data3 = User.objects.filter(first_name__startswith  = r2);
+						data5 = [];
+						for ob in data3:
+							temp = allUsers.objects.filter(user = ob).first();
+							if temp != None:
+								if(temp.status == True):
+									temp2 = "xxx";
+									if temp.top_category == "Users":
+										temp2 = Users.objects.get(user = temp);
+									elif temp.top_category == "Organizations":
+										temp2 = Organizations.objects.get(user = temp);
+
+									if temp2!="xxx" and (temp2.sub_category == r1 or r1 =="all"):
+										data5.append(temp2);
+
+						data["data5"] = data5;
+						data['data6'] = True;
+						s = "Showing result for " + r1 +" category";
+						if(r2 != ""):
+							s+=" with name "+ r2;
+						data["data7"] = s;
+					data["data8"] = ShowUploads(user);
+					
+					return render(response,"PDMS/PatientSearch.html",data);
 	return redirect("home");
 
 

@@ -47,7 +47,7 @@ class Users(models.Model):
 class Organizations(models.Model):
 	user = models.OneToOneField(allUsers, on_delete = models.CASCADE);
 	sub_category = models.CharField(max_length = 22);
-	desc = models.CharField(max_length = 200);
+	desc = models.CharField(max_length = 85);
 	pic1 = models.FileField(upload_to = getDirectory, max_length = 250);
 	pic2 = models.FileField(upload_to = getDirectory, max_length = 250);
 	location = models.CharField(max_length = 50);

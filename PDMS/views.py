@@ -49,7 +49,31 @@ def registerOrg(response):
 			return redirect("dashboard");
 	elif response.method == "POST":
 		resp = response.POST;
-	return redirect(response, "PDMS/SignUpPage.html")
+		name = resp.get('name');
+		username = resp.get('username');
+		email = resp.get("email");
+		pass1 = resp.get("password1")
+		pass2 = resp.get("password2");
+		sub_category = resp.get("type");
+		poi =  response.FILES["filename"];
+
+		desc = resp.get("desc");
+		location = resp.get("location");
+		phn = resp.get("phn");
+		pic1 = response.FILES['img1'];
+		pic2 = response.FILES["img2"];
+
+		#print(name,username,email,pass1,pass2,sub_category,poi,desc,location, phn, pic1,pic2);
+		user = User(first_name = name, username= username, email= email);
+		user.set_password(pass1);
+		user.save();
+		user = allUsers(user = user, top_category = 'Organizations', status = False);
+		user.save();
+		user = Organizations(user = user ,sub_category = sub_category, poi = poi,desc= desc, pic1 = pic1, pic2 = pic2, location = location, contact = phn);
+		user.save();
+		messages.success(response, "Profile Share Successfully, Now wait for admin to approve !!")
+	return redirect("registerUser");
+
 
 # View for sign up
 def registerUser(response):
@@ -59,7 +83,24 @@ def registerUser(response):
 			return redirect("dashboard");
 	elif response.method == "POST":
 		resp = response.POST;
+		name = resp.get('name');
+		username = resp.get('username');
+		email = resp.get("email");
+		pass1 = resp.get("password1")
+		pass2 = resp.get("password2");
+		sub_category = resp.get("type");
+		poi =  response.FILES["filename"];
+		#print(name,username,email,pass1,pass2,sub_category,poi);
+		user = User(first_name = name, username= username, email= email);
+		user.set_password(pass1);
+		user.save();
+		user = allUsers(user = user, top_category = 'Users', status = False);
+		user.save();
+		user = Users(user = user ,sub_category = sub_category, poi = poi);
+		user.save();
+		messages.success(response, "Profile Share Successfully, Now wait for admin to approve!!")
 	return render(response, "PDMS/SignUpPage.html");
+
 
 
 def editProfile(response,data):
@@ -78,6 +119,7 @@ def editProfile(response,data):
 			messages.error(response, "Invalid credendtials !!");
 	else:
 		messages.error(response,"Invalid credendtials !!");
+
 
 
 #View for dashboad -

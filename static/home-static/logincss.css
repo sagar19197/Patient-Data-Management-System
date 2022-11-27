@@ -3,8 +3,11 @@
     padding:0;
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
-}
 
+}
+body{
+    background-color: black;
+}
 
 #h3{
     padding:5px;
@@ -14,11 +17,6 @@
 .outer{
     height: 100%;
     width: 100%;
-    background-image: linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url(background_image.jpg);
-    background-position: center;
-    background-size: cover;
-    position: absolute;
-    
 }
 
 .form-container{
@@ -90,11 +88,12 @@ h2{
     cursor:pointer;
     display: block;
     margin:auto;
-    background: linear-gradient(to right, blue,skyblue);
+    background: green;
     border:0;
     outline:none;
     border-radius:30px;
     margin-top: 20px;
+    color: white;
 }
 
 #login{

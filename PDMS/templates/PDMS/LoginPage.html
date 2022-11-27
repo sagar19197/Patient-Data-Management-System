@@ -10,48 +10,39 @@
     <title>PDMS | LOG IN</title>
 </head>
 <body>
+    <a href = "/"><h2 style="text-align: center;color:white">Patient Data Management System</h2></a>
     <div class="outer">
         <div class="form-container">
             <div class="button-container">
-                <h2>Sign in to PDSM</h2>
+                <h2>Sign in to PDMS</h2>
                 <br><br>
                 {% for m in messages %}
-            <h4>{{m}}</h4>
-            {% endfor %}
+                    <script>alert(" {{m}}");</script>
+                {% endfor %}
             </div>
             <form id="login" method = "POST" action="/login/" class="input">
             	{% csrf_token %}
-                <input type="text" class="input-field" name = "username" placeholder="Enter Username" required>
+                <input type="text" class="input-field" name = "username" placeholder="Enter Email" required>
                 <input type="password" id = pass1 class="input-field" placeholder="Password"  name = "password" required>
                 
-                <div class="g-recaptcha" data-sitekey="6LfEdMoiAAAAAI2VVn72munk8NCQ9bWET5JxepmR"></div>
+                <div class="g-recaptcha" data-sitekey="6Lf8aTgjAAAAAGhbWBHMZPMm_Z91lSD1SJmZzfSW"></div>
 
                 <button type="submit" class="submit-btn" value="submit">Login</button>
+                <br>
+                <a href = "/signup/"><p style="text-align: center;">Dont' have an account? Create one</p></a>
             </form>
             
         </div>
     </div>
     
     <script>
-        var x = document.getElementById("login");
-        var y = document.getElementById("register");
-        var z = document.getElementById("btn");
-        var registerpass1 = document.getElementById("passregister1");
-        var registerpass2 = document.getElementById("passregister2");
+        window.onload = function() {
+        var $recaptcha = document.querySelector('#g-recaptcha-response');
 
-
-        function validatePassword_login(){
-            if(loginpass1.value != loginpass2.value) {
-                loginpass2.setCustomValidity("Passwords Don't Match");
-            }
-            else{
-                loginpass2.setCustomValidity("");
-            }
+        if($recaptcha) {
+        $recaptcha.setAttribute("required", "required");
+        }
         };
-
-        loginpass1.onchange = validatePassword_login;
-        loginpass2.onkeyup = validatePassword_login;
-
 
     </script>
 </body>

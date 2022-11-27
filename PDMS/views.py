@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .models import allUsers, Users, Organizations, UploadDocuments, ReceivedDocuments
 import os
-
+import requests, json, re
 
 # View for homepage.
 def home(response):
@@ -28,17 +28,50 @@ def loginUser(response):
 			return redirect("home");
 	elif response.method == "POST":
 		resp = response.POST;
-		user = authenticate(response, username = resp.get('username'),password = resp.get('password'));
-		if user is not None:
-			login(response,user);
-			if allUsers.objects.get(user = response.user).status == True or allUsers.objects.get(user = response.user).top_category == "admin":
-				return redirect("dashboard");
-			else:
-				logout(response);
-				messages.error(response, "Please wait, while Admin approves your login request !!")
+
+		clientKey = response.POST['g-recaptcha-response'];
+		secretKey = '6Lf8aTgjAAAAAFg3iIqAs5McLmiXbUWsrmZ8DL9P';
+		capthchaData = {
+		 'secret' : secretKey,
+		 'response' : clientKey
+		}
+		cap_res = requests.post("https://www.google.com/recaptcha/api/siteverify",data = capthchaData);
+		cap_res = json.loads(cap_res.text);
+		cap_res = cap_res['success'];
+		if cap_res == False:
+			messages.error(response, "ERROR : CAPTHCHA FAILED !!");
 		else:
-			messages.error(response,"Invalid credendtials !!")
+			user = authenticate(response, username = resp.get('username'),password = resp.get('password'));
+			if user is not None:
+				login(response,user);
+				if allUsers.objects.get(user = response.user).status == True or allUsers.objects.get(user = response.user).top_category == "admin":
+					return redirect("dashboard");
+				else:
+					logout(response);
+					messages.error(response, "ERROR : Please wait, while Admin approves your login request !!")
+			else:
+				messages.error(response,"ERROR : Invalid credendtials !!")
 	return render(response,"PDMS/LoginPage.html");
+
+
+
+
+def checkFile(file_name , format):
+	filename = file_name.name.split('.');
+	if(len(filename) <= 1 or (filename[0] == "" and len(filename) == 2)):
+		return False;
+	file_format = str(filename[-1]).lower();
+	if(format == "pdf"):
+		if(file_format != "pdf"):
+			return False;
+	else:
+		if(file_format != "jpg" and file_format!="jpeg"):
+			return False;
+
+	size = file_name.size/1024;
+	if(size==0 or size > 2048):
+		return False;
+	return True;
 
 
 
@@ -49,8 +82,10 @@ def registerOrg(response):
 			return redirect("dashboard");
 	elif response.method == "POST":
 		resp = response.POST;
+
+		check = True;
 		name = resp.get('name');
-		username = resp.get('username');
+		username = resp.get('email');
 		email = resp.get("email");
 		pass1 = resp.get("password1")
 		pass2 = resp.get("password2");
@@ -59,11 +94,79 @@ def registerOrg(response):
 
 		desc = resp.get("desc");
 		location = resp.get("location");
-		phn = resp.get("phn");
 		pic1 = response.FILES['img1'];
 		pic2 = response.FILES["img2"];
 
-		#print(name,username,email,pass1,pass2,sub_category,poi,desc,location, phn, pic1,pic2);
+		if (bool(re.match("^[A-Za-z\s]{1,20}$", name))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify name in correct format.");
+	
+		elif (bool(re.match("^([a-z0-9_\.\+-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$", username))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify Username in correct format.");
+			
+		elif (bool(re.match("^([a-z0-9_\.\+-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$", email))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify email in correct format.");
+		
+		elif (bool(re.match("(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$", pass1))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify email in correct format.");
+		
+		elif (bool(re.match("(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$", pass2))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify email in correct format.");
+
+		elif pass1 != pass2:
+			check = False;
+			messages.error(response, "ERROR : Password don't match");
+
+		elif (sub_category!="Hospital" and sub_category!="Pharmacy" and sub_category!="Insurance"):
+			check = False;
+			messages.error(response, "ERROR : Sent Wrong Priviliges");
+
+		elif (bool(re.match("^[a-zA-Z0-9\s]{1,300}$", desc))) == False:
+			check = False;
+			messages.error(response, "ERROR : Description in invalid format");
+
+		elif (bool(re.match("^[a-zA-Z\s]{1,20}$", location))) == False:
+			check = False;
+			messages.error(response, "ERROR : Invalid Location format");
+
+		elif checkFile(poi,"pdf") == False:
+			check = False;
+			messages.error(response, "ERROR : Please Provide Correct File in Proof of Identity");
+
+		elif checkFile(pic1,"jpg") == False:
+			check = False;
+			messages.error(response, "ERROR : Please Provide Correct File in Picture 1");
+
+		elif checkFile(pic2,"jpg") == False:
+			check = False;
+			messages.error(response, "ERROR : Please Provide Correct File in Picture 2");	
+
+		elif User.objects.filter(username = username).exists():
+			check = False;
+			messages.error(response, "ERROR : Email Already Exist, Please register with some other EMAIL");
+
+		if check == True:
+			clientKey = response.POST['g-recaptcha-response'];
+			secretKey = '6Lf8aTgjAAAAAFg3iIqAs5McLmiXbUWsrmZ8DL9P';
+			capthchaData = {
+			 'secret' : secretKey,
+			 'response' : clientKey
+			}
+			cap_res = requests.post("https://www.google.com/recaptcha/api/siteverify",data = capthchaData);
+			cap_res = json.loads(cap_res.text);
+			cap_res = cap_res['success'];
+			if cap_res == False:
+				check = False;
+				messages.error(response, "CAPTHCHA FAILED !!");
+
+		
+		print("check = ", check);
+		print(name,username,email,pass1,pass2,sub_category,poi,desc,location, pic1,pic2);
+		"""
 		user = User(first_name = name, username= username, email= email);
 		user.set_password(pass1);
 		user.save();
@@ -71,8 +174,10 @@ def registerOrg(response):
 		user.save();
 		user = Organizations(user = user ,sub_category = sub_category, poi = poi,desc= desc, pic1 = pic1, pic2 = pic2, location = location, contact = phn);
 		user.save();
-		messages.success(response, "Profile Share Successfully, Now wait for admin to approve !!")
-	return redirect("registerUser");
+		"""
+		messages.success(response, "Profile Shared Successfully, Now wait for admin to approve !!")
+		
+	return render(response, "PDMS/SignUpPageOrg.html");
 
 
 # View for sign up
@@ -83,14 +188,70 @@ def registerUser(response):
 			return redirect("dashboard");
 	elif response.method == "POST":
 		resp = response.POST;
+
+		check = True;
 		name = resp.get('name');
-		username = resp.get('username');
+		username = resp.get('email');
 		email = resp.get("email");
 		pass1 = resp.get("password1")
 		pass2 = resp.get("password2");
 		sub_category = resp.get("type");
 		poi =  response.FILES["filename"];
-		#print(name,username,email,pass1,pass2,sub_category,poi);
+
+		if (bool(re.match("^[A-Za-z\s]{1,20}$", name))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify name in correct format.");
+	
+		elif (bool(re.match("^([a-z0-9_\.\+-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$", username))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify Username in correct format.");
+			
+		elif (bool(re.match("^([a-z0-9_\.\+-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$", email))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify email in correct format.");
+		
+		elif (bool(re.match("(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$", pass1))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify email in correct format.");
+		
+		elif (bool(re.match("(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$", pass2))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify email in correct format.");
+
+		elif pass1 != pass2:
+			check = False;
+			messages.error(response, "ERROR : Password don't match");
+
+		elif (sub_category!="Patient" and sub_category!="HealthCareProfessional"):
+			check = False;
+			messages.error(response, "ERROR : Sent Wrong Priviliges");
+
+		elif checkFile(poi,"pdf") == False:
+			check = False;
+			messages.error(response, "ERROR : Please Provide Correct File in Proof of Identity");
+
+		elif User.objects.filter(username = username).exists():
+			check = False;
+			messages.error(response, "ERROR : Email Already Exist, Please register with some other EMAIL");
+
+		if check == True:
+			clientKey = response.POST['g-recaptcha-response'];
+			secretKey = '6Lf8aTgjAAAAAFg3iIqAs5McLmiXbUWsrmZ8DL9P';
+			capthchaData = {
+			 'secret' : secretKey,
+			 'response' : clientKey
+			}
+			cap_res = requests.post("https://www.google.com/recaptcha/api/siteverify",data = capthchaData);
+			cap_res = json.loads(cap_res.text);
+			cap_res = cap_res['success'];
+			if cap_res == False:
+				check = False;
+				messages.error(response, "CAPTHCHA FAILED !!");
+
+		
+		print("check = ", check);
+		print(name,username,email,pass1,pass2,sub_category,poi);
+		"""
 		user = User(first_name = name, username= username, email= email);
 		user.set_password(pass1);
 		user.save();
@@ -98,7 +259,9 @@ def registerUser(response):
 		user.save();
 		user = Users(user = user ,sub_category = sub_category, poi = poi);
 		user.save();
+		"""
 		messages.success(response, "Profile Share Successfully, Now wait for admin to approve!!")
+		
 	return render(response, "PDMS/SignUpPage.html");
 
 
@@ -127,9 +290,9 @@ def editProfile(response,data):
 			data["data"] = user_post
 			messages.success(response, "Profile Updated successfully !!");
 		else:
-			messages.error(response, "Invalid credendtials !!");
+			messages.error(response, "ERROR : Invalid credendtials !!");
 	else:
-		messages.error(response,"Invalid credendtials !!");
+		messages.error(response,"ERROR : Invalid credendtials !!");
 
 
 

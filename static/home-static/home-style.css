@@ -1,5 +1,5 @@
 .content{
-    width: 100%;
+    width: 98%;
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -7,17 +7,14 @@
 }
 .homepage{
     width: 100%;
-    height:100vh;
-    background-image: linear-gradient(rgba(0,0,0,0.70),rgba(0,0,0,0.70)),url(home-hospital.jpg);
-    ;
-    background-size: cover;
-    background-position: center;
+    height:100%;
+    background-color: black;
 }
 h1{
     font-family: sans-serif;
     color: white;
     font-size: 65px;
-    margin-top: 80px;
+    margin-top: 50px;
 }
 button{
     width:200px;
@@ -36,9 +33,4 @@ p{
     font-size: 30px;
     color: white;
     font-style: sans-serif;
-}
-#lg{
-    margin-top: 30px;
-    margin-left: 50px;
-    width: 150px;
 }

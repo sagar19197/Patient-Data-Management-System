@@ -14,16 +14,12 @@
 .outer{
     height: 100%;
     width: 100%;
-    background-image: linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),url(background_image.jpg);
-    background-position: center;
-    background-size: cover;
-    position: absolute;
-    
+    background-color: black;
 }
 
 .form-container{
     width:380px;
-    height:715px;
+    height:785px;
     position: relative;
     background-color: aliceblue;
     margin:1% auto;
@@ -50,13 +46,11 @@
 
 #btn{
     top:0;
-    left:0;
     position: absolute;
     width: 110px;
     height:100%;
     background: linear-gradient(to right, blue,skyblue);
     border-radius: 30px;
-    transition: .5s;
 }
 
 .input{
@@ -84,20 +78,18 @@
     cursor:pointer;
     display: block;
     margin:auto;
-    background: linear-gradient(to right, blue,skyblue);
+    background: linear-gradient(to right, darkgreen,green);
     border:0;
     outline:none;
     border-radius:30px;
     margin-top:10px;
+    color: white;
 }
 
 #login{
     left:50px;
 }
 
-#register{
-    left:450px;
-}
 #register-btn{
     width: 100px;
 }

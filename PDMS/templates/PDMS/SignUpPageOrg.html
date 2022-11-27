@@ -1,0 +1,132 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'home-static/cssfile.css' %}">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <title>Sign Up | PDMS</title>
+</head>
+<body>
+	{% for m in messages %}
+            <script>alert(" {{m}}");</script>
+            {% endfor %}
+    <div class="outer">
+        <a href = "/"><h2 style="text-align: center;color:white">Patient Data Management System</h2></a>
+        <div class="form-container">
+            <div class="button-container">
+                <div id="btn" style="left:110px"></div>
+                <a href = "/signup/"><button type="button" id="login-btn" class="toggle-btn" >User</button></a>
+                <a href="/signupOrg/"><button type="button" id = "register-btn" class="toggle-btn">Organization</button></a>
+            </div>
+            
+            <form id = "login" method = "POST" action="/signupOrg/" class="input" enctype="multipart/form-data">
+            	{%csrf_token%}
+                <input type="text" class="input-field" placeholder="First Name" pattern="^[A-Za-z\s]{1,20}$" title="Must contain alphabets only and less than 20 characters"  name = "name"  maxlength ="20" required>
+                
+                <input type="email" class="input-field" placeholder="Email Address" name = "email" required>
+                <input type="password" id = "passregister1" class="input-field" placeholder="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 100 characters" name = "password1" maxlength ="100" required>
+                
+                <input type="password" id = "passregister2" class="input-field" placeholder="Confirm Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 100 characters.SHOULD BE same as previous typed password" name = "password2" maxlength ="100" required>
+                <input type="text" class="input-field" placeholder="Description" pattern="^[a-zA-Z0-9\s]{1,300}$" title="Must contain alphanumeric only and be greater than 8 characters and less than 300 characters" name = "desc" maxlength ="300" required>
+                <input type="text" class="input-field" placeholder="Location" pattern="^[a-zA-Z\s]{1,20}$" title="Must contain alphabets only and less than 20 characters" name = "location" maxlength = "20" required >
+                
+                <br><br>
+                Subcategory:
+                <select name = "type" required>
+            		<option value = "Hospital">Hospital</option>
+            		<option value = "Pharmacy">Pharmacy</option>
+            		<option value = "Insurance">Insurance Company</option>
+            	</select>
+            	<br><br>
+                <label for="img1">Upload first picture of Organization [Format: jpeg or jpg only]</label>
+                <input type="file" id="img1" name="img1" accept="image/jpeg, image/jpg" onchange="filevalidation('img1','jpg')" required>
+                <br><br>
+                <label for="img">Upload second picture of Organization [Format: jpeg or jpg only]</label>
+                <input type="file" id="img" name="img2" accept="image/jpeg, image/jpg" onchange="filevalidation('img','jpg')" required>
+                <br><br>
+                <label for="Aadhar2" >Upload your Proof of Identity:[pdf]</label>
+
+                <input type="file"  onchange="filevalidation('Aadhar2','pdf')" placeholder="Upload Aadhar" name="filename" id="Aadhar2" accept="application/pdf" required>
+                <br><br>
+                <div class="g-recaptcha" data-sitekey="6Lf8aTgjAAAAAGhbWBHMZPMm_Z91lSD1SJmZzfSW"></div>
+                <button type="submit" class="submit-btn">Register</button>
+                <br>
+                <a href = "/login/"><p style="text-align: center;">Already Registered? Login Here</p></a>
+                
+            </form>
+
+        </div>
+    </div>
+    <script>
+        var registerpass1 = document.getElementById("passregister1");
+        var registerpass2 = document.getElementById("passregister2");
+        
+
+        function validatePassword_register(){
+            if(registerpass1.value != registerpass2.value) {
+                registerpass2.setCustomValidity("Passwords Don't Match");
+            }
+            else{
+                registerpass2.setCustomValidity("");
+            }
+        };
+
+        registerpass1.onchange = validatePassword_register;
+        registerpass2.onkeyup = validatePassword_register;
+
+
+        function filevalidation(filename, fileformat){
+            const file = document.getElementById(filename);
+            if(file.files.length>0){
+                var extension = file.files.item(0).name.split(".");
+                if(extension.length === 1 || (extension[0]==="" && extension.length===2 )){
+                    alert("Select file of specified format only");
+                    file.value = "";
+                    return;
+                }
+                var format = extension.pop().toLowerCase();
+                if(fileformat === "pdf"){
+                    if(format !="pdf"){
+                        alert("Select file of specified format only");
+                        file.value = "";
+                        return;
+
+                    }
+                }
+                else{
+                    if(format !="jpeg" && format !="jpg"){
+                        alert("Select file of specified format only");
+                        file.value = "";
+                        return;
+                    }   
+                }
+                const filesize = Math.round(file.files.item(0).size/1024);
+                if(filesize>2048){
+                    alert("File size is too big, please select a file less than 2MB");
+                    file.value="";
+                    return;
+                }
+                if(filesize==0){
+                    alert("File size is too small")
+                    return;
+                }
+            }
+        };
+
+        window.onload = function() {
+    	var $recaptcha = document.querySelector('#g-recaptcha-response');
+
+    	if($recaptcha) {
+        $recaptcha.setAttribute("required", "required");
+    }
+};
+
+
+
+    </script>
+</body>
+</html>

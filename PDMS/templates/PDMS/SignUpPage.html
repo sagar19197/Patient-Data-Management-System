@@ -8,88 +8,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'home-static/cssfile.css' %}">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    <title>Document</title>
+    <title>Sign Up | PDMS</title>
 </head>
 <body>
 	{% for m in messages %}
-            <h4>{{m}}</h4>
+            <script>alert(" {{m}}");</script>
             {% endfor %}
     <div class="outer">
+        <a href = "/"><h2 style="text-align: center;color:white">Patient Data Management System</h2></a>
         <div class="form-container">
             <div class="button-container">
-                <div id="btn"></div>
-                <button type="button" id="login-btn" class="toggle-btn" onclick="login()">User</button>
-                <button type="button" id = "register-btn" class="toggle-btn" onclick="register()">Organization</button>
+                <div id="btn" style="left:0px"></div>
+                <a href = "/signup/"><button type="button" id="login-btn" class="toggle-btn" >User</button></a>
+                <a href="/signupOrg/"><button type="button" id = "register-btn" class="toggle-btn">Organization</button></a>
             </div>
             <form id="login" method = "POST" action="/signup/" class="input" enctype="multipart/form-data">
             	{%csrf_token%}
-                <input type="text" class="input-field" placeholder="First Name" pattern="[a-zA-Z]+" title="Must contain alphabets only"  name = "name" required>
+                <input type="text" class="input-field" placeholder="First Name" pattern="^[A-Za-z\s]{1,20}$" title="Must contain alphabets only and less than 20 characters"  name = "name" maxlength ="20" required>
                 
-                <input type="text" class="input-field" placeholder="User Name" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one uppercase,lowercase letter and One number, and between 8 and 15 characters"  name = "username" required>
                 <input type="email" class="input-field" placeholder="Email Address" name ="email" required>
-                <input type="password" id = pass1 class="input-field" placeholder="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 100 characters" name ="password1" required>
-                <input type="password" id = pass2 class="input-field" placeholder="Confirm Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 15 characters" name ="password2" required>
+                <input type="password" id = pass1 class="input-field" placeholder="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 100 characters" name ="password1" maxlength ="100" required>
+                <input type="password" id = pass2 class="input-field" placeholder="Confirm Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 100 characters. SHOULD BE same as previous typed password" name ="password2"  maxlength ="100" required>
             	<br><br>
-            	Type of User:
+            	Subcategory:
             	<select name = "type" required>
             		<option value = "Patient">Patient</option>
             		<option value = "HealthCareProfessional">Health Care Professional</option>
             	</select>
             	<br><br>
-                <label for="Aadhar" >Upload Proof of Identity:</label>
-                <input type="file"  onchange="filevalidation()" placeholder="Upload Aadhar" name="filename" id="Aadhar" accept="application/pdf" required>
+                <label for="Aadhar" >Upload Proof of Identity:[pdf]</label>
+                <input type="file"  onchange="filevalidation('Aadhar','pdf')" placeholder="Upload Aadhar" name="filename" id="Aadhar" accept="application/pdf" required>
                 <br><br>
-                <div class="g-recaptcha" data-sitekey="6LfEdMoiAAAAAI2VVn72munk8NCQ9bWET5JxepmR"></div>
+                <div class="g-recaptcha" data-sitekey="6Lf8aTgjAAAAAGhbWBHMZPMm_Z91lSD1SJmZzfSW"></div>
 
                 <button type="submit" class="submit-btn">Register</button>
+                <br>
+                <a href = "/login/"><p style="text-align: center;">Already Registered? Login Here</p></a>
             </form>
 
-
-
-
-
-
-            <form id = "register" method = "POST" action="/signupOrg/" class="input" enctype="multipart/form-data">
-            	{%csrf_token%}
-                <input type="text" class="input-field" placeholder="First Name" pattern="[a-zA-Z]+" title="Must contain alphabets only"  name = "name" required>
-                <input type="text" class="input-field" placeholder="User Name" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one uppercase,lowercase letter and One number, and between 8 and 15 characters"  name = "username" required>
-                <input type="email" class="input-field" placeholder="Email Address" name = "email" required>
-                <input type="password" id = "passregister1" class="input-field" placeholder="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 15 characters" name = "password1"required>
-                
-                <input type="password" id = "passregister2" class="input-field" placeholder="Confirm Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 15 characters" name = "password2" required>
-                <input type="text" class="input-field" placeholder="Description" pattern="(?=.*[a-z])(?=.*[A-Z]).{8,100}" title="Must be greater than 8 characters and less than 100 characters" name = "desc" required>
-                <input type="text" class="input-field" placeholder="Location" pattern="(?=.*[a-z])(?=.*[A-Z]).{8,15}" title="Must contain at least one uppercase and lowercase letter, and between 8 and 15 characters" name = "location" required >
-                <input type = "number" id = "phone-number" class = input-field placeholder="Phone number" min = "1000000000" max = "9999999999" title = "must be a 12 digit number" name = "phn" required>
-                <br>
-                Type of Organization:
-                <select name = "type" required>
-            		<option value = "Hospital">Hospital</option>
-            		<option value = "Pharmacy">Pharmacy</option>
-            		<option value = "Insurance Company">Insurance Company</option>
-            	</select>
-            	<br>
-                <label for="img">Org picture</label>
-                <input type="file" id="img" name="img1" accept="image/*">
-                <label for="img">Org picture</label>
-                <input type="file" id="img" name="img2" accept="image/*">
-
-                <br>
-                
-                <label for="Aadhar2" >Upload your aadhar:</label>
-                <input type="file"  onchange="filevalidation1()" placeholder="Upload Aadhar" name="filename" id="Aadhar2" accept="application/pdf" required>
-                <div class="g-recaptcha" data-sitekey="6LfEdMoiAAAAAI2VVn72munk8NCQ9bWET5JxepmR"></div>
-                <button type="submit" class="submit-btn">Register</button>
-                
-            </form>
 
         </div>
     </div>
     <script>
-        var x = document.getElementById("login");
-        var y = document.getElementById("register");
-        var z = document.getElementById("btn");
-        var registerpass1 = document.getElementById("passregister1");
-        var registerpass2 = document.getElementById("passregister2");
+        
         var loginpass1 = document.getElementById("pass1");
         var loginpass2 = document.getElementById("pass2");
 
@@ -105,51 +66,40 @@
         loginpass1.onchange = validatePassword_login;
         loginpass2.onkeyup = validatePassword_login;
 
-        function validatePassword_register(){
-            if(registerpass1.value != registerpass2.value) {
-                registerpass2.setCustomValidity("Passwords Don't Match");
-            }
-            else{
-                registerpass2.setCustomValidity("");
-            }
-        };
-
-        registerpass1.onchange = validatePassword_register;
-        registerpass2.onkeyup = validatePassword_register;
-
-        function register(){
-            x.style.left = "-400px";
-            y.style.left = "50px";
-            z.style.left = "110px"
-        };
-
-        function login(){
-            x.style.left = "50px"
-            y.style.left = "450px"
-            z.style.left = "0px"
-        };
-
-        function filevalidation(){
-            const file = document.getElementById("Aadhar");
+        function filevalidation(filename, fileformat){
+            const file = document.getElementById(filename);
             if(file.files.length>0){
+                var extension = file.files.item(0).name.split(".");
+                if(extension.length === 1 || (extension[0]==="" && extension.length===2 )){
+                    alert("Select file of specified format only");
+                    file.value = "";
+                    return;
+                }
+                var format = extension.pop().toLowerCase();
+                if(fileformat === "pdf"){
+                    if(format !="pdf"){
+                        alert("Select file of specified format only");
+                        file.value = "";
+                        return;
+
+                    }
+                }
+                else{
+                    if(format !="jpeg" && format !="jpg"){
+                        alert("Select file of specified format only");
+                        file.value = "";
+                        return;
+                    }   
+                }
                 const filesize = Math.round(file.files.item(0).size/1024);
-                if(filesize>1024){
+                if(filesize>2048){
                     alert("File size is too big, please select a file less than 2MB");
+                    file.value="";
+                    return;
                 }
                 if(filesize==0){
                     alert("File size is too small")
-                }
-            }
-        };
-        function filevalidation1(){
-            const file = document.getElementById("Aadhar2");
-            if(file.files.length>0){
-                const filesize = Math.round(file.files.item(0).size/1024);
-                if(filesize>1024){
-                    alert("File size is too big, please select a file less than 2MB");
-                }
-                if(filesize==0){
-                    alert("File size is too small")
+                    return;
                 }
             }
         };

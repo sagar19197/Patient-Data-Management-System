@@ -19,8 +19,8 @@ Approve Registration
 <table>
 	<tr>
 		<th>Name</th>
-		<th>Username</th>
 		<th>Email</th>
+		<th>Email_Verified</th>
 		<th>Proof of Identity</th>
 		<th>Approve/Reject</th>
 	</tr>
@@ -28,8 +28,12 @@ Approve Registration
 		{%if ob.sub_category == i and ob.user.status == False%}
 		<tr>
 			<td>{{ob.user.user.first_name}}</td>
-			<td>{{ob.user.user.username}}</td>
 			<td>{{ob.user.user.email}}</td>
+			{% if ob.user.user.is_active == True %}
+			<td>Yes</td>
+			{%else%}
+			<td>No</td>
+			{%endif%}
 			<td><a href={{ob.poi.url}}>PDF</a></td>
 			<td>
 				<form method = "POST" action = "/viewDocuments/">
@@ -53,8 +57,8 @@ Approve Registration
 <table>
 	<tr>
 		<th>Name</th>
-		<th>Username</th>
 		<th>Email</th>
+		<th>Email_Verified</th>
 		<th>Proof of Identity</th>
 		<th>Approve/Reject</th>
 	</tr>
@@ -62,8 +66,12 @@ Approve Registration
 		{%if ob.sub_category == i and ob.user.status == False%}
 		<tr>
 			<td>{{ob.user.user.first_name}}</td>
-			<td>{{ob.user.user.username}}</td>
 			<td>{{ob.user.user.email}}</td>
+			{% if ob.user.user.is_active == True %}
+			<td>Yes</td>
+			{%else%}
+			<td>No</td>
+			{%endif%}
 			<td><a href={{ob.poi.url}}>PDF</a></td>
 			<td>
 				<form method = "POST" action = "/viewDocuments/">
@@ -78,4 +86,7 @@ Approve Registration
 	{%endfor%}
 </table>
 {%endfor%}
+{% for m in messages %}
+	<script>alert(" {{m}}");</script>
+{% endfor %}
 {%endblock%}

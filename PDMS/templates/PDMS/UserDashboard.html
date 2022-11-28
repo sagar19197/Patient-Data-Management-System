@@ -15,18 +15,20 @@ Profile
 <form method = "POST" action = "/dashboard/">
 	{%csrf_token%}
 	Name:
-	<input type="text" name="name" value = {{data.first_name}}>
+	<input type="text" class="input-field" placeholder="First Name" pattern="^[A-Za-z\s]{1,20}$" title="Must contain alphabets only and less than 20 characters"  name = "name"  maxlength ="20" value = "{{data.first_name}}">
 	<br><br>
 	Email:
-	<input type = "Email" name = "email" value = {{data.email}}>
+	<strong>{{request.user.username}}</strong>
 	<br><br>
-	Username:
-	{{request.user.username}}
-	<br><br>
-	Current password : <input type="password" name = "current_pass" required><br><br>
+	Current password : 
+	<input type="password" id = "pass1" class="input-field" placeholder="Current Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 100 characters" name = "current_pass" maxlength ="100" required><br><br>
 	<h4>Change Password:</h4>
-	New password : <input type="password" name="new_pass"><br><br>
-	Confirm New password : <input type="password" name="new_pass_confirm">
+	New password :
+	<input type="password" id = "passregister1" class="input-field" placeholder="New Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 100 characters" name = "new_pass" maxlength ="100"><br><br>
+	Confirm New password :
+	<input type="password" id = "passregister2" class="input-field" placeholder="Confirm Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 100 characters.SHOULD BE same as previous typed password" name = "new_pass_confirm" maxlength ="100">
+	<br><br>
+	<div class="g-recaptcha" data-sitekey="6Lf8aTgjAAAAAGhbWBHMZPMm_Z91lSD1SJmZzfSW"></div>
 	<br><br>
 	<button type="Submit"> Change</button>
 	<br><br>

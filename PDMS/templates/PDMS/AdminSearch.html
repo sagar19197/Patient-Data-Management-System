@@ -23,7 +23,7 @@ Search
 		<option value = "Pharmacy">Pharmacy</option>
 		<option value = "Insurance">Insurance</option>
 	</select>
-	<input type="text" name="Name" placeholder="Enter Name">
+	<input type="text" class="input-field" placeholder="Enter Name" pattern="^[A-Za-z\s]{1,20}$" title="Must contain alphabets only and less than 20 characters"  name = "Name"  maxlength ="20" >
 	<button type="submit">Search</button>
 </form>
 
@@ -126,4 +126,7 @@ Search
 </table>
 {%endif%}
 {%endif%}
+{% for m in messages %}
+	<script>alert(" {{m}}");</script>
+{% endfor %}
 {%endblock%}

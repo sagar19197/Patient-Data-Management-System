@@ -73,7 +73,7 @@ def loginUser(response):
 				else:
 
 
-					"""
+					
 					o = generateOtp();
 					subject='OTP for login to PDMS'
 					body="Your OTP for login to PDMS is: "+ o;
@@ -91,7 +91,7 @@ def loginUser(response):
 					response.session['pk']=user.email	
 					return redirect("otp");
 
-					"""
+					
 					login(response, user);
 					return redirect("dashboard");
 
@@ -492,32 +492,89 @@ def registerAdmin(response):
 	return render(response, "PDMS/SignUpPageAdmin.html");
 
 
+
+
 def editProfile(response,data):
+
+	check = True;
 	resp = response.POST;
-	user_post = allUsers.objects.get(user = response.user).user;
-	user_post.first_name = resp.get('name');
-	user_post.email = resp.get('email');
+	name = resp.get('name');
+	pass1 = resp.get('current_pass');
+	new_pass = resp.get("new_pass");
+	new_pass_confirm = resp.get("new_pass_confirm");
+	clientKey = response.POST['g-recaptcha-response'];
+	
+	if name == None or pass1 == None or clientKey == None :
+		check == False;
+		messages.error(response, "One or more Fields missing!!");
 
-	u11 = allUsers.objects.get(user = response.user);
-	if u11.top_category == "Organizations":
-		u1 = Organizations.objects.get(user = u11);
-		u1.desc = resp.get("desc");
-		u1.location = resp.get("location");
+	elif (bool(re.match("^[A-Za-z\s]{1,20}$", name))) == False:
+		check = False;
+		messages.error(response, "ERROR : Please specify name in correct format.");
 
-	if response.user.check_password(resp.get('current_pass')):
-		if resp.get('new_pass') == resp.get('new_pass_confirm'):
-			if len(resp.get('new_pass')) != 0:
-				user_post.set_password(resp.get("new_pass"));
-			user_post.save();
-			if u11.top_category == "Organizations":
-				u1.save();
-				data["data2"] = u1;
-			data["data"] = user_post
-			messages.success(response, "Profile Updated successfully !!");
+	elif (bool(re.match("(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$", pass1))) == False:
+		check = False;
+		messages.error(response, "ERROR : Please specify Current password in correct format.");
+
+	elif new_pass != new_pass_confirm:
+		check = False;
+		messages.error(response, "ERROR : New Passwords dont match.");
+
+	if check == True:
+		clientKey = response.POST['g-recaptcha-response'];
+		secretKey = '6Lf8aTgjAAAAAFg3iIqAs5McLmiXbUWsrmZ8DL9P';
+		capthchaData = {
+		 'secret' : secretKey,
+		 'response' : clientKey
+		}
+		cap_res = requests.post("https://www.google.com/recaptcha/api/siteverify",data = capthchaData);
+		cap_res = json.loads(cap_res.text);
+		cap_res = cap_res['success'];
+		if cap_res == False:
+			check = False;
+			messages.error(response, "CAPTHCHA FAILED !!");
+
+	if check == True:
+		user_post = response.user;
+		user_post.first_name = resp.get('name');
+
+		u11 = allUsers.objects.get(user = response.user);
+		if u11.top_category == "Organizations":
+			desc = resp.get("desc");
+			location = resp.get("location");
+
+			if desc == None or location == None :
+				check == False;
+				messages.error(response, "One or more Fields missing!!");
+
+			elif (bool(re.match("^[a-zA-Z0-9\s]{1,300}$", resp.get("desc")))) == False:
+				check = False;
+				messages.error(response, "ERROR : Description in invalid format");
+
+			elif (bool(re.match("^[a-zA-Z\s]{1,20}$", location))) == False:
+				check = False;
+				messages.error(response, "ERROR : Invalid Location format");
+			if check == False:
+				return;
+
+			u1 = Organizations.objects.get(user = u11);
+			u1.desc = resp.get("desc");
+			u1.location = resp.get("location");
+
+		if response.user.check_password(resp.get('current_pass')):
+			if resp.get('new_pass') == resp.get('new_pass_confirm'):
+				if len(resp.get('new_pass')) != 0:
+					user_post.set_password(resp.get("new_pass"));
+				user_post.save();
+				if u11.top_category == "Organizations":
+					u1.save(update_fields=['desc', 'location']);
+					data["data2"] = u1;
+				data["data"] = user_post
+				messages.success(response, "Profile Updated successfully !!");
+			else:
+				messages.error(response, "ERROR : Invalid credendtials !!");
 		else:
-			messages.error(response, "ERROR : Invalid credendtials !!");
-	else:
-		messages.error(response,"ERROR : Invalid credendtials !!");
+			messages.error(response,"ERROR : Invalid credendtials !!");
 
 
 
@@ -525,7 +582,7 @@ def editProfile(response,data):
 def dashboard(response):
 	if response.user.is_authenticated:
 		user = get_object_or_404(allUsers, user = response.user);
-		data = {"data" : allUsers.objects.get(user = response.user).user}
+		data = {"data" : response.user}
 		if user.top_category == "admin":
 			if response.method == "POST":
 				editProfile(response,data);
@@ -636,13 +693,18 @@ def viewDocuments(response):
 		if user.top_category == "admin":
 			if response.method == "POST":
 				resp = response.POST;
-				user_action = get_object_or_404(User,username = resp.get("username"));
-				user_action = get_object_or_404(allUsers, user = user_action);
-				if resp.get('action') == "Approve":
-					user_action.status = True;
-					user_action.save();
+				if resp.get('action')!="Approve" and resp.get("action")!= "Reject":
+					messages.error(response, "Not valid input");
+				elif resp.get("username") == response.user.username:
+					messages.error(response, "Can not delete himself");
 				else:
-					deleteUser(user_action);
+					user_action = get_object_or_404(User,username = resp.get("username"));
+					user_action = get_object_or_404(allUsers, user = user_action);
+					if resp.get('action') == "Approve":
+						user_action.status = True;
+						user_action.save();
+					else:
+						deleteUser(user_action);
 			return render(response,"PDMS/AdminApprove.html",data);
 
 		elif user.status == True:
@@ -750,27 +812,34 @@ def search(response):
 				resp = response.POST;
 				r1 = resp.get('Users');
 				r2 = resp.get('Name');
-				data3 = User.objects.filter(first_name__startswith  = r2);
-				data5 = [];
-				for ob in data3:
-					temp = allUsers.objects.filter(user = ob).first();
-					if temp != None:
-						if(temp.status == True):
-							temp2 = "xxx";
-							if temp.top_category == "Users":
-								temp2 = Users.objects.get(user = temp);
-							elif temp.top_category == "Organizations":
-								temp2 = Organizations.objects.get(user = temp);
+				if r1 == None or r2 == None:
+					messages.error(response ,"One or more values missing");
+				elif r1!="all" and r1!="Patient" and r1!="HealthCareProfessional" and r1!="Hospital" and r1!="Pharmacy" and r1!="Insurance":
+					message.error(response,"Wrong Priviliges");
+				elif (bool(re.match("^[A-Za-z\s]{0,20}$", r2))) == False:
+					messages.error(response, "ERROR : Please specify name in correct format.");
+				else: 
+					data3 = User.objects.filter(first_name__startswith  = r2);
+					data5 = [];
+					for ob in data3:
+						temp = allUsers.objects.filter(user = ob).first();
+						if temp != None:
+							if(temp.status == True):
+								temp2 = "xxx";
+								if temp.top_category == "Users":
+									temp2 = Users.objects.get(user = temp);
+								elif temp.top_category == "Organizations":
+									temp2 = Organizations.objects.get(user = temp);
 
-							if temp2!="xxx" and (temp2.sub_category == r1 or r1 =="all"):
-								data5.append(temp2);
+								if temp2!="xxx" and (temp2.sub_category == r1 or r1 =="all"):
+									data5.append(temp2);
 
-				data["data5"] = data5;
-				data['data6'] = True;
-				s = "Showing result for " + r1 +" category";
-				if(r2 != ""):
-					s+=" with name "+ r2;
-				data["data7"] = s;
+					data["data5"] = data5;
+					data['data6'] = True;
+					s = "Showing result for " + r1 +" category";
+					if(r2 != ""):
+						s+=" with name "+ r2;
+					data["data7"] = s;
 			return render(response,"PDMS/AdminSearch.html",data);
 
 		elif user.status == True:

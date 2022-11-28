@@ -7,9 +7,19 @@
 		{% block title %}
 		{% endblock %}
 	</title>
-
+	<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 	<!-- css -->
 	<style>
+
+		#g-recaptcha-response {
+    display: block !important;
+    position: absolute;
+    margin: -78px 0 0 0 !important;
+    width: 302px !important;
+    height: 76px !important;
+    z-index: -999999;
+    opacity: 0;
+}
 
 		/* Screen resolution */
 		@media screen and (max-width: 400px) {
@@ -82,5 +92,16 @@
 		{% block side_content %}
 		{% endblock %}
 	</div>
+
+	<script>
+		window.onload = function() {
+    	var $recaptcha = document.querySelector('#g-recaptcha-response');
+
+    	if($recaptcha) {
+        $recaptcha.setAttribute("required", "required");
+    }
+};
+
+	</script>
 </body>
 </html>

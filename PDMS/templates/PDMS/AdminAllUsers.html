@@ -18,7 +18,6 @@ All Users
 <table>
 	<tr>
 		<th>Name</th>
-		<th>Username</th>
 		<th>Email</th>
 		<th>Proof of Identity</th>
 	</tr>
@@ -26,7 +25,6 @@ All Users
 		{%if ob.sub_category == i and ob.user.status == True%}
 		<tr>
 			<td>{{ob.user.user.first_name}}</td>
-			<td>{{ob.user.user.username}}</td>
 			<td>{{ob.user.user.email}}</td>
 			<td><a href={{ob.poi.url}}>PDF</a></td>
 		</tr>

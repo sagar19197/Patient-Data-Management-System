@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-_!f=2cc%$f0k=65^@bu3-%5*p8pk@20198yp84xnr$86$+$ss1
 DEBUG = True
 
 ALLOWED_HOSTS = ['192.168.3.44','127.0.0.1']
-
+CSRF_COOKIE_HTTPONLY = False
 
 # Application definition
 
@@ -127,3 +127,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 import os;
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/");
+
+# For Email verification 
+EMAIL_HOST="smtp.gmail.com"
+EMAIL_HOST_USER="FCSproject26iiitd@gmail.com"
+EMAIL_USE_TLS=True
+DEFAULT_FROM_EMAIL="FCSproject26iiitd@gmail.com"
+EMAIL_PORT=587
+EMAIL_HOST_PASSWORD="cljctbnflzaphulc"

@@ -16,7 +16,8 @@ urlpatterns = [
     path('logout/', views.logoutUser, name = "logoutUser"),
     path('deleteUser/', views.adminDeleteUser, name = "adminDeleteUser"),
     path('deleteUpload/', views.userDeleteUpload, name = "userDeleteUpload"),
-    path('sendDoc/', views.userSendDoc, name= "userSendDoc")
+    path('sendDoc/', views.userSendDoc, name= "userSendDoc"),
+    path('activate/<uidb64>/<token>', views.activate_user, name="activate")
 ]
 
 if settings.DEBUG:

@@ -6,6 +6,14 @@ from django.contrib import messages
 from .models import allUsers, Users, Organizations, UploadDocuments, ReceivedDocuments
 import os
 import requests, json, re
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_bytes, force_text, force_str, DjangoUnicodeDecodeError
+from .utils import maketoken
+
 
 # View for homepage.
 def home(response):
@@ -42,13 +50,13 @@ def loginUser(response):
 			messages.error(response, "ERROR : CAPTHCHA FAILED !!");
 		else:
 			user = authenticate(response, username = resp.get('username'),password = resp.get('password'));
+			print(user);
 			if user is not None:
-				login(response,user);
-				if allUsers.objects.get(user = response.user).status == True or allUsers.objects.get(user = response.user).top_category == "admin":
-					return redirect("dashboard");
-				else:
-					logout(response);
+				if allUsers.objects.get(user = user).status == False and allUsers.objects.get(user = user).top_category != "admin":
 					messages.error(response, "ERROR : Please wait, while Admin approves your login request !!")
+				else:
+					login(response, user);
+					return redirect("dashboard");
 			else:
 				messages.error(response,"ERROR : Invalid credendtials !!")
 	return render(response,"PDMS/LoginPage.html");
@@ -163,21 +171,52 @@ def registerOrg(response):
 				check = False;
 				messages.error(response, "CAPTHCHA FAILED !!");
 
-		
+		"""
 		print("check = ", check);
 		print(name,username,email,pass1,pass2,sub_category,poi,desc,location, pic1,pic2);
 		"""
-		user = User(first_name = name, username= username, email= email);
-		user.set_password(pass1);
-		user.save();
-		user = allUsers(user = user, top_category = 'Organizations', status = False);
-		user.save();
-		user = Organizations(user = user ,sub_category = sub_category, poi = poi,desc= desc, pic1 = pic1, pic2 = pic2, location = location, contact = phn);
-		user.save();
-		"""
-		messages.success(response, "Profile Shared Successfully, Now wait for admin to approve !!")
-		
+		if check == True:
+			user = User(first_name = name, username= username, email= email);
+			user.is_active = False;
+			user.set_password(pass1);
+			user.save();
+			user1 = user;
+			user = allUsers(user = user, top_category = 'Organizations', status = False);
+			user.save();
+			user = Organizations(user = user ,sub_category = sub_category, poi = poi,desc= desc, pic1 = pic1, pic2 = pic2, location = location, contact = "9999999898");
+			user.save();
+			
+			currenturl=get_current_site(response)
+			subject='Verify your Email for PDMS'
+			body=render_to_string('PDMS/activate.html',{
+            	'user': user1,
+                'domain':currenturl,
+                'uid':urlsafe_base64_encode(force_bytes(user1.pk)),
+                'token': maketoken.make_token(user1)
+            })
+			send_mail(subject,body,
+				settings.EMAIL_HOST_USER,
+				[email],
+				fail_silently=False)
+			messages.success(response, "Please Verify your Email Address to complete the Registration. CHECK YOUR EMAIL FOR VERIFICATION LINK!!");
+			return redirect("loginUser");	
 	return render(response, "PDMS/SignUpPageOrg.html");
+
+
+#View for email activation
+def activate_user(request, uidb64, token):
+    
+    try:
+        uid = force_text(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except Exception as e:
+        user = None
+    if user!=None and maketoken.check_token(user, token) and user.is_active == False:
+        user.is_active = True
+        user.save()
+        messages.success(request,"Your Account has been verified !!");
+        return redirect('loginUser')
+    return HttpResponse("<h2>Activation Link Invalid</h2>");
 
 
 # View for sign up
@@ -248,19 +287,35 @@ def registerUser(response):
 				check = False;
 				messages.error(response, "CAPTHCHA FAILED !!");
 
-		
+		"""
 		print("check = ", check);
 		print(name,username,email,pass1,pass2,sub_category,poi);
 		"""
-		user = User(first_name = name, username= username, email= email);
-		user.set_password(pass1);
-		user.save();
-		user = allUsers(user = user, top_category = 'Users', status = False);
-		user.save();
-		user = Users(user = user ,sub_category = sub_category, poi = poi);
-		user.save();
-		"""
-		messages.success(response, "Profile Share Successfully, Now wait for admin to approve!!")
+		if check == True:
+			user = User(first_name = name, username= username, email= email);
+			user.is_active = False;
+			user.set_password(pass1);
+			user.save();
+			user1 = user;
+			user = allUsers(user = user, top_category = 'Users', status = False);
+			user.save();
+			user = Users(user = user ,sub_category = sub_category, poi = poi);
+			user.save();
+			
+			currenturl=get_current_site(response)
+			subject='Verify your Email for PDMS'
+			body=render_to_string('PDMS/activate.html',{
+            	'user': user1,
+                'domain':currenturl,
+                'uid':urlsafe_base64_encode(force_bytes(user1.pk)),
+                'token': maketoken.make_token(user1)
+            })
+			send_mail(subject,body,
+				settings.EMAIL_HOST_USER,
+				[email],
+				fail_silently=False)
+			messages.success(response, "Please Verify your Email Address to complete the Registration. CHECK YOUR EMAIL FOR VERIFICATION LINK!!");
+			return redirect("loginUser");	
 		
 	return render(response, "PDMS/SignUpPage.html");
 

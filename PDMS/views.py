@@ -20,9 +20,7 @@ from django.core.exceptions import ObjectDoesNotExist
 def home(response):
 	c = { "door" : False };
 	if response.user.is_authenticated:
-		user = get_object_or_404(allUsers, user = response.user);
-		if user.top_category == "admin" or user.status == True:
-			c['door'] = True;
+		c['door'] = True;
 	return render(response,"PDMS/HomePage.html", c);
 
 
@@ -30,11 +28,7 @@ def home(response):
 # View for logging in the user
 def loginUser(response):
 	if response.user.is_authenticated:
-		user = get_object_or_404(allUsers, user = response.user);
-		if user.top_category == "admin" or user.status == True:
-			return redirect("dashboard");
-		else:
-			return redirect("home");
+		return redirect("dashboard");
 	elif response.method == "POST":
 
 		resp = response.POST;
@@ -74,7 +68,7 @@ def loginUser(response):
 			user = authenticate(response, username = username,password = pass1);
 			
 			if user is not None:
-				if allUsers.objects.get(user = user).status == False and allUsers.objects.get(user = user).top_category != "admin":
+				if allUsers.objects.get(user = user).status == False:
 					messages.error(response, "ERROR : Please wait, while Admin approves your login request !!")
 				else:
 
@@ -163,9 +157,7 @@ def checkFile(file_name , format):
 
 def registerOrg(response):
 	if response.user.is_authenticated:
-		user = get_object_or_404(allUsers, user = response.user);
-		if user.top_category == "admin" or user.status == True:
-			return redirect("dashboard");
+		return redirect("dashboard");
 	elif response.method == "POST":
 		resp = response.POST;
 
@@ -305,9 +297,7 @@ def activate_user(request, uidb64, token):
 # View for sign up
 def registerUser(response):
 	if response.user.is_authenticated:
-		user = get_object_or_404(allUsers, user = response.user);
-		if user.top_category == "admin" or user.status == True:
-			return redirect("dashboard");
+		return redirect("dashboard");
 	elif response.method == "POST":
 		resp = response.POST;
 
@@ -407,6 +397,99 @@ def registerUser(response):
 		
 	return render(response, "PDMS/SignUpPage.html");
 
+
+
+def registerAdmin(response):
+	if response.user.is_authenticated:
+		return redirect("dashboard");
+
+	elif response.method == "POST":
+		resp = response.POST;
+
+		check = True;
+		name = resp.get('name');
+		username = resp.get('email');
+		email = resp.get("email");
+		pass1 = resp.get("password1")
+		pass2 = resp.get("password2");
+		clientKey = response.POST['g-recaptcha-response'];
+
+		if name == None or username == None or email == None or pass1 == None or pass2 == None or clientKey == None :
+			check == False;
+			messages.error(response, "One or more Fields missing!!");
+
+		elif (bool(re.match("^[A-Za-z\s]{1,20}$", name))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify name in correct format.");
+	
+		elif (bool(re.match("^([a-z0-9_\.\+-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$", username))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify Username in correct format.");
+			
+		elif (bool(re.match("^([a-z0-9_\.\+-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$", email))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify email in correct format.");
+		
+		elif (bool(re.match("(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$", pass1))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify password 1 in correct format.");
+		
+		elif (bool(re.match("(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$", pass2))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify  password 2 in correct format.");
+
+		elif pass1 != pass2:
+			check = False;
+			messages.error(response, "ERROR : Password don't match");
+
+		elif User.objects.filter(username = username).exists():
+			check = False;
+			messages.error(response, "ERROR : Email Already Exist, Please register with some other EMAIL");
+
+		if check == True:
+			clientKey = response.POST['g-recaptcha-response'];
+			secretKey = '6Lf8aTgjAAAAAFg3iIqAs5McLmiXbUWsrmZ8DL9P';
+			capthchaData = {
+			 'secret' : secretKey,
+			 'response' : clientKey
+			}
+			cap_res = requests.post("https://www.google.com/recaptcha/api/siteverify",data = capthchaData);
+			cap_res = json.loads(cap_res.text);
+			cap_res = cap_res['success'];
+			if cap_res == False:
+				check = False;
+				messages.error(response, "CAPTHCHA FAILED !!");
+
+		"""
+		print("check = ", check);
+		print(name,username,email,pass1,pass2,sub_category,poi);
+		"""
+		if check == True:
+			user = User(first_name = name, username= username, email= email);
+			user.is_active = False;
+			user.set_password(pass1);
+			user.save();
+			user1 = user;
+			user = allUsers(user = user, top_category = 'admin', status = False);
+			user.save();
+			
+			currenturl=get_current_site(response)
+			subject='Verify your Email for PDMS'
+			body=render_to_string('PDMS/activate.html',{
+            	'user': user1,
+                'domain':currenturl,
+                'uid':urlsafe_base64_encode(force_bytes(user1.pk)),
+                'token': maketoken.make_token(user1)
+            })
+			send_mail(subject,body,
+				settings.EMAIL_HOST_USER,
+				[email],
+				fail_silently=False)
+			messages.success(response, "Please Verify your Email Address to complete the Registration. CHECK YOUR EMAIL FOR VERIFICATION LINK!!");
+			return redirect("loginUser");	
+
+
+	return render(response, "PDMS/SignUpPageAdmin.html");
 
 
 def editProfile(response,data):

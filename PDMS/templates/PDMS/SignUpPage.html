@@ -17,12 +17,16 @@
     <div class="outer">
         <a href = "/"><h2 style="text-align: center;color:white">Patient Data Management System</h2></a>
         <div class="form-container">
+            {%block user_form%}
             <div class="button-container">
                 <div id="btn" style="left:0px"></div>
                 <a href = "/signup/"><button type="button" id="login-btn" class="toggle-btn" >User</button></a>
                 <a href="/signupOrg/"><button type="button" id = "register-btn" class="toggle-btn">Organization</button></a>
             </div>
+            {%endblock%}
+            {%block form_tag%}
             <form id="login" method = "POST" action="/signup/" class="input" enctype="multipart/form-data">
+            {%endblock%}
             	{%csrf_token%}
                 <input type="text" class="input-field" placeholder="First Name" pattern="^[A-Za-z\s]{1,20}$" title="Must contain alphabets only and less than 20 characters"  name = "name" maxlength ="20" required>
                 
@@ -30,6 +34,7 @@
                 <input type="password" id = pass1 class="input-field" placeholder="Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 100 characters" name ="password1" maxlength ="100" required>
                 <input type="password" id = pass2 class="input-field" placeholder="Confirm Password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$" title="Must contain at least one number and one uppercase and lowercase letter, and between 8 and 100 characters. SHOULD BE same as previous typed password" name ="password2"  maxlength ="100" required>
             	<br><br>
+                {%block user_content%}
             	Subcategory:
             	<select name = "type" required>
             		<option value = "Patient">Patient</option>
@@ -39,11 +44,15 @@
                 <label for="Aadhar" >Upload Proof of Identity:[pdf]</label>
                 <input type="file"  onchange="filevalidation('Aadhar','pdf')" placeholder="Upload Aadhar" name="filename" id="Aadhar" accept="application/pdf" required>
                 <br><br>
+                {%endblock%}
                 <div class="g-recaptcha" data-sitekey="6Lf8aTgjAAAAAGhbWBHMZPMm_Z91lSD1SJmZzfSW"></div>
 
                 <button type="submit" class="submit-btn">Register</button>
                 <br>
                 <a href = "/login/"><p style="text-align: center;">Already Registered? Login Here</p></a>
+                {%block add_links%}
+                <br><a href = "/signupAdmin/"><p style="text-align: center;">Register as Admin? Move here</p></a>
+                {%endblock%}
             </form>
 
 
@@ -65,6 +74,8 @@
 
         loginpass1.onchange = validatePassword_login;
         loginpass2.onkeyup = validatePassword_login;
+
+        {% block user_filevalidation %}
 
         function filevalidation(filename, fileformat){
             const file = document.getElementById(filename);
@@ -103,7 +114,7 @@
                 }
             }
         };
-
+        {% endblock%}
         window.onload = function() {
     	var $recaptcha = document.querySelector('#g-recaptcha-response');
 

@@ -3,8 +3,8 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import allUsers, Users, Organizations, UploadDocuments, ReceivedDocuments
-import os
+from .models import allUsers, Users, Organizations, UploadDocuments, ReceivedDocuments,OTP
+import os,random
 import requests, json, re
 from django.core.mail import send_mail
 from django.conf import settings
@@ -13,7 +13,8 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes, force_text, force_str, DjangoUnicodeDecodeError
 from .utils import maketoken
-
+from datetime import datetime, timedelta, timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 # View for homepage.
 def home(response):
@@ -50,17 +51,67 @@ def loginUser(response):
 			messages.error(response, "ERROR : CAPTHCHA FAILED !!");
 		else:
 			user = authenticate(response, username = resp.get('username'),password = resp.get('password'));
-			print(user);
+			
 			if user is not None:
 				if allUsers.objects.get(user = user).status == False and allUsers.objects.get(user = user).top_category != "admin":
 					messages.error(response, "ERROR : Please wait, while Admin approves your login request !!")
 				else:
-					login(response, user);
-					return redirect("dashboard");
+
+					o = generateOtp();
+					subject='OTP for login to PDMS'
+					body="Your OTP for login to PDMS is: "+ o;
+					email=user.email
+					send_mail(subject,body,settings.EMAIL_HOST_USER,[email],fail_silently=False,)
+					try:
+						otp = OTP.objects.get(user = user);
+						otp.otp = o;
+						otp.time = datetime.now(timezone.utc);
+						otp.save();
+					except ObjectDoesNotExist:
+						otp = OTP(user = user, otp = o, time = datetime.now(timezone.utc));
+						otp.save();
+
+					response.session['pk']=user.email	
+					return redirect("otp");
+
 			else:
 				messages.error(response,"ERROR : Invalid credendtials !!")
 	return render(response,"PDMS/LoginPage.html");
 
+
+def generateOtp():
+	ans=""
+	for i in range(0,6):
+		r=random.randint(0,9)
+		ans=ans+str(r)
+	return ans;
+
+
+def otp(response):
+	if response.user.is_authenticated:
+		return redirect("loginUser");
+	pk=response.session.get('pk');
+	if pk is not None:
+		user = User.objects.get(email = pk);
+		otp = OTP.objects.get(user = user);
+		if response.method == "POST":
+			del response.session["pk"];
+			code = response.POST.get("code");
+			if(code == otp.otp):
+				
+				if(datetime.now(timezone.utc)-otp.time > timedelta(seconds = 60)):
+					messages.error(response, "ERROR : OTP Expired!! Please Login again");
+					return redirect("loginUser");
+				else:
+					login(response, user);
+					return redirect("dashboard");
+			else:
+				messages.error(response, "ERROR : Incorret OTP!! Please Login again");
+				return redirect("loginUser");
+		return render(response, "PDMS/otp.html");
+
+	else:
+		return redirect("loginUser");
 
 
 

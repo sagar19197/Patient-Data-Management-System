@@ -51,6 +51,7 @@ class Organizations(models.Model):
 	pic1 = models.FileField(upload_to = getDirectory, max_length = 250);
 	pic2 = models.FileField(upload_to = getDirectory, max_length = 250);
 	location = models.CharField(max_length = 50);
+	desc = models.CharField(max_length = 300)
 	contact = models.CharField(max_length = 12);
 	poi = models.FileField(upload_to = getDirectory, validators = [FileExtensionValidator(['pdf'])], max_length = 250);
 	
@@ -75,3 +76,12 @@ class ReceivedDocuments(models.Model):
 	
 	def __str__(self):
 		return self.user.user.username;
+
+# model for otp
+class OTP(models.Model):
+	user = models.OneToOneField(User, on_delete = models.CASCADE);
+	otp = models.CharField(max_length = 6);
+	time = models.DateTimeField();
+
+	def __str__(self):
+		return self.user.username

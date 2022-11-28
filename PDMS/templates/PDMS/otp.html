@@ -1,0 +1,19 @@
+{% extends "PDMS/LoginPage.html"%}
+
+{%block heading%}
+Enter OTP :
+{%endblock%}
+
+
+ {%block form %}
+<form id="login" method = "POST" action="/otp/" class="input">
+            	{% csrf_token %}
+                <input type="text" class="input-field" name = "code" placeholder="Enter OTP" pattern="^[0-9]{1,6}$" maxlength = 6 required>
+               
+                <button type="submit" class="submit-btn" value="submit">Verify and Proceed</button>
+                <br><br>
+                <p style="text-align: center;">We have sent an email on your registered Email. Please note that OTP will automatically <strong>expire after 1 minute<strong></p>
+            </form>
+
+
+ {%endblock%}

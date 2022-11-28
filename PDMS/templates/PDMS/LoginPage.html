@@ -14,12 +14,13 @@
     <div class="outer">
         <div class="form-container">
             <div class="button-container">
-                <h2>Sign in to PDMS</h2>
+                <h2>{% block heading %} Sign in to PDMS {% endblock%}</h2>
                 <br><br>
                 {% for m in messages %}
                     <script>alert(" {{m}}");</script>
                 {% endfor %}
             </div>
+            {%block form %}
             <form id="login" method = "POST" action="/login/" class="input">
             	{% csrf_token %}
                 <input type="text" class="input-field" name = "username" placeholder="Enter Email" required>
@@ -31,7 +32,7 @@
                 <br>
                 <a href = "/signup/"><p style="text-align: center;">Dont' have an account? Create one</p></a>
             </form>
-            
+            {%endblock%}
         </div>
     </div>
     

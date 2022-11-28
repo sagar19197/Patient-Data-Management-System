@@ -36,27 +36,50 @@ def loginUser(response):
 		else:
 			return redirect("home");
 	elif response.method == "POST":
-		resp = response.POST;
 
-		clientKey = response.POST['g-recaptcha-response'];
-		secretKey = '6Lf8aTgjAAAAAFg3iIqAs5McLmiXbUWsrmZ8DL9P';
-		capthchaData = {
-		 'secret' : secretKey,
-		 'response' : clientKey
-		}
-		cap_res = requests.post("https://www.google.com/recaptcha/api/siteverify",data = capthchaData);
-		cap_res = json.loads(cap_res.text);
-		cap_res = cap_res['success'];
-		if cap_res == False:
-			messages.error(response, "ERROR : CAPTHCHA FAILED !!");
+		resp = response.POST;
+		check = True;
+		username = resp.get('username');
+		pass1 = resp.get('password');
+		clientKey = response.POST['g-recaptcha-response']
+
+		if username == None or pass1 == None or clientKey == None:
+			check = False;
+			messages.error(response, "One or more Fields missing!!");
+
+		elif (bool(re.match("^([a-z0-9_\.\+-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$", username))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify email in correct format.");
+		
+		elif (bool(re.match("(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$", pass1))) == False:
+			check = False;
+			messages.error(response, "ERROR : Please specify password in correct format.");
+
+		if check == True:
+			clientKey = response.POST['g-recaptcha-response'];
+			secretKey = '6Lf8aTgjAAAAAFg3iIqAs5McLmiXbUWsrmZ8DL9P';
+			capthchaData = {
+			 'secret' : secretKey,
+			 'response' : clientKey
+			}
+			cap_res = requests.post("https://www.google.com/recaptcha/api/siteverify",data = capthchaData);
+			cap_res = json.loads(cap_res.text);
+			cap_res = cap_res['success'];
+			if cap_res == False:
+				check = False;
+
+		if check == False:
+			messages.error(response, "ERROR: One or more Field are in invalid format !!");
 		else:
-			user = authenticate(response, username = resp.get('username'),password = resp.get('password'));
+			user = authenticate(response, username = username,password = pass1);
 			
 			if user is not None:
 				if allUsers.objects.get(user = user).status == False and allUsers.objects.get(user = user).top_category != "admin":
 					messages.error(response, "ERROR : Please wait, while Admin approves your login request !!")
 				else:
 
+
+					"""
 					o = generateOtp();
 					subject='OTP for login to PDMS'
 					body="Your OTP for login to PDMS is: "+ o;
@@ -73,6 +96,10 @@ def loginUser(response):
 
 					response.session['pk']=user.email	
 					return redirect("otp");
+
+					"""
+					login(response, user);
+					return redirect("dashboard");
 
 			else:
 				messages.error(response,"ERROR : Invalid credendtials !!")
@@ -155,14 +182,19 @@ def registerOrg(response):
 		location = resp.get("location");
 		pic1 = response.FILES['img1'];
 		pic2 = response.FILES["img2"];
+		clientKey = response.POST['g-recaptcha-response'];
 
-		if (bool(re.match("^[A-Za-z\s]{1,20}$", name))) == False:
+		if name == None or username == None or email == None or pass1 == None or pass2 == None or sub_category==None or poi == None or clientKey == None or pic1 == None or pic2 == None or desc == None or location == None:
+			check == False;
+			messages.error(response, "One or more Fields missing!!");
+
+		elif (bool(re.match("^[A-Za-z\s]{1,20}$", name))) == False:
 			check = False;
 			messages.error(response, "ERROR : Please specify name in correct format.");
 	
 		elif (bool(re.match("^([a-z0-9_\.\+-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$", username))) == False:
 			check = False;
-			messages.error(response, "ERROR : Please specify Username in correct format.");
+			messages.error(response, "ERROR : Please specify email in correct format.");
 			
 		elif (bool(re.match("^([a-z0-9_\.\+-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$", email))) == False:
 			check = False;
@@ -170,11 +202,11 @@ def registerOrg(response):
 		
 		elif (bool(re.match("(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$", pass1))) == False:
 			check = False;
-			messages.error(response, "ERROR : Please specify email in correct format.");
+			messages.error(response, "ERROR : Please specify password 1 in correct format.");
 		
 		elif (bool(re.match("(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$", pass2))) == False:
 			check = False;
-			messages.error(response, "ERROR : Please specify email in correct format.");
+			messages.error(response, "ERROR : Please specify password 2 in correct format.");
 
 		elif pass1 != pass2:
 			check = False;
@@ -287,8 +319,13 @@ def registerUser(response):
 		pass2 = resp.get("password2");
 		sub_category = resp.get("type");
 		poi =  response.FILES["filename"];
+		clientKey = response.POST['g-recaptcha-response'];
 
-		if (bool(re.match("^[A-Za-z\s]{1,20}$", name))) == False:
+		if name == None or username == None or email == None or pass1 == None or pass2 == None or sub_category==None or poi == None or clientKey == None :
+			check == False;
+			messages.error(response, "One or more Fields missing!!");
+
+		elif (bool(re.match("^[A-Za-z\s]{1,20}$", name))) == False:
 			check = False;
 			messages.error(response, "ERROR : Please specify name in correct format.");
 	
@@ -302,11 +339,11 @@ def registerUser(response):
 		
 		elif (bool(re.match("(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$", pass1))) == False:
 			check = False;
-			messages.error(response, "ERROR : Please specify email in correct format.");
+			messages.error(response, "ERROR : Please specify password 1 in correct format.");
 		
 		elif (bool(re.match("(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,100}$", pass2))) == False:
 			check = False;
-			messages.error(response, "ERROR : Please specify email in correct format.");
+			messages.error(response, "ERROR : Please specify  password 2 in correct format.");
 
 		elif pass1 != pass2:
 			check = False;

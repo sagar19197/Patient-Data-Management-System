@@ -258,7 +258,7 @@ def registerOrg(response):
 			user1 = user;
 			user = allUsers(user = user, top_category = 'Organizations', status = False);
 			user.save();
-			user = Organizations(user = user ,sub_category = sub_category, poi = poi,desc= desc, pic1 = pic1, pic2 = pic2, location = location, contact = "9999999898");
+			user = Organizations(user = user ,sub_category = sub_category, poi = poi,desc= desc, pic1 = pic1, pic2 = pic2, location = location);
 			user.save();
 			
 			currenturl=get_current_site(response)
@@ -503,7 +503,6 @@ def editProfile(response,data):
 		u1 = Organizations.objects.get(user = u11);
 		u1.desc = resp.get("desc");
 		u1.location = resp.get("location");
-		u1.contact = resp.get("contact");
 
 	if response.user.check_password(resp.get('current_pass')):
 		if resp.get('new_pass') == resp.get('new_pass_confirm'):
